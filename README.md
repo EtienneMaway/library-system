@@ -4,6 +4,22 @@
 
 A web system that lets librarians manage books, members and loans from a browser. All data is stored in MySQL (MariaDB). Built with PHP, HTML, CSS and JavaScript by Group Sixteen for Database 2, CAT 2.
 
+## Quick start
+
+After setting up once (Windows or Mac steps below), these are the only commands you need. Run them from the project folder, in Git Bash on Windows or Terminal on a Mac.
+
+```sh
+composer dev:doctor     # what's installed, running or missing, with a fix for each
+composer dev:start      # start Apache and MySQL, print the app link
+composer dev:seed       # create library_db with the sample data
+composer code:check     # run the checks before you push
+composer code:fix       # fix PHP code style automatically
+```
+
+The full list is under [Project commands](#project-commands-composer).
+
+## Contents
+
 - [What you need](#what-you-need)
 - [Set up on Windows (XAMPP)](#set-up-on-windows-xampp)
 - [Set up on a Mac (Homebrew)](#set-up-on-a-mac-homebrew)
@@ -21,6 +37,7 @@ A web system that lets librarians manage books, members and loans from a browser
 | PHP version | 8.3.36, 8.4.27, 8.5.12 or newer | Same |
 | Git | [git-scm.com](https://git-scm.com) | Comes with Xcode tools, or `brew install git` |
 | Editor | VS Code or any editor | Same |
+| Composer (runs the project commands) | Composer-Setup.exe from [getcomposer.org](https://getcomposer.org), pointed at `C:\xampp\php\php.exe` | `brew install composer` |
 
 Older PHP versions have two critical security flaws (CVE-2026-109618 and CVE-2026-109619). Check yours with `php -v` or in the XAMPP Control Panel.
 
@@ -46,9 +63,13 @@ Without Git, download the ZIP from GitHub and extract it so the folder is `C:\xa
 1. Click **New**, enter `library_db`, choose the collation `utf8mb4_general_ci`, and click **Create**.
 2. Select `library_db`, open the **Import** tab, choose `database/library_db.sql` from the project, and click **Import**.
 
+With Composer installed (see [Project commands](#project-commands-composer)), `composer dev:seed` in Git Bash does both steps for you.
+
 **5. Check the connection settings.** `config/database.php` uses XAMPP's defaults: user `root` and an empty password. Change nothing unless you set a MySQL password yourself.
 
 **6. Open the app** at <http://localhost/library-system>.
+
+**7. Check everything.** Run `composer dev:doctor` in Git Bash. Each line should say OK. Any MISS line comes with the fix to run.
 
 ## Set up on a Mac (Homebrew)
 
@@ -109,18 +130,18 @@ $cfg['Servers'][$i]['AllowNoPassword'] = true;
 **5. Start the servers.**
 
 ```sh
-brew services start mariadb@10.11
-brew services start httpd
+brew install composer
+composer dev:start
 ```
 
-**6. Match XAMPP's login and load the data.** These commands give `root` an empty password, as on XAMPP, then create the database with its sample data:
+**6. Match XAMPP's login and load the data.** The first command gives `root` an empty password, as on XAMPP, and only needs running once. The second creates the database with its sample data.
 
 ```sh
 /opt/homebrew/opt/mariadb@10.11/bin/mariadb -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('');"
-/opt/homebrew/opt/mariadb@10.11/bin/mariadb -uroot < database/library_db.sql
+composer dev:seed
 ```
 
-**7. Open the app** at <http://localhost:8080/library-system>. phpMyAdmin is at <http://localhost:8080/phpmyadmin>.
+**7. Open the app** at <http://localhost:8080/library-system>. phpMyAdmin is at <http://localhost:8080/phpmyadmin>. Run `composer dev:doctor` to confirm every line says OK.
 
 Mac addresses use port 8080 because port 80 needs admin rights. Links inside the app work on either port.
 
@@ -175,10 +196,15 @@ On a Mac the services start again on their own after a restart. On Windows, open
 
 Re-import `database/library_db.sql`. It deletes every table in `library_db` and rebuilds it, so anything you added is lost. Loan dates are counted from the import day, so the overdue loans stay overdue.
 
-- **Windows:** phpMyAdmin, select `library_db`, **Import**, choose the file.
-- **Mac:** `/opt/homebrew/opt/mariadb@10.11/bin/mariadb -uroot < database/library_db.sql`
+```sh
+composer dev:seed
+```
+
+Without Composer, on Windows: open phpMyAdmin, select `library_db`, click **Import** and choose the file.
 
 ## Problems and fixes
+
+Run `composer dev:doctor` first. It finds most of these problems and prints the fix.
 
 | What you see | Cause | Fix |
 | --- | --- | --- |
@@ -294,19 +320,23 @@ Open the failed check on the pull request page to see which file and line to fix
 Run them before every push, from the project folder, in Git Bash on Windows or Terminal on a Mac:
 
 ```sh
-bash .github/scripts/check-all.sh           # code checks, takes about a minute
-bash .github/scripts/check-all.sh --full    # also the database and app test, before a pull request
-bash .github/scripts/check-all.sh --fix     # fixes PHP code style automatically
+composer code:check         # code checks, takes about a minute
+composer code:check:full    # also the database and app test, before a pull request
+composer code:fix           # fixes PHP code style automatically
 ```
 
-`--full` resets `library_db` to the sample data, and needs Apache and MySQL running.
+Without Composer, use `bash .github/scripts/check-all.sh`, adding `--full` or `--fix` as needed.
+
+`code:check:full` resets `library_db` to the sample data, and needs Apache and MySQL running.
 
 It needs PHP (XAMPP's is found automatically) and an internet connection the first time, to download the PHP checkers. The JavaScript and CSS checks need [Node.js](https://nodejs.org); without it they are skipped, but GitHub still runs them.
 
 **Make it automatic.** Run this once in your clone, and the code checks run every time you `git push`. A failing check stops the push.
 
 ```sh
-git config core.hooksPath .github/hooks
+composer hooks:install
 ```
+
+This runs `git config core.hooksPath .github/hooks`.
 
 **Before submitting,** one member follows only this README on a fresh Windows XAMPP install, and the group fixes whatever fails.
