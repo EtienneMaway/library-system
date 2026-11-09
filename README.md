@@ -139,6 +139,19 @@ After logging in, the dashboard should show 10 titles, 8 active members and 3 ov
 
 There is no build step and no separate backend server. Apache runs the PHP files and sends the pages to the browser. Edit a file, save it, and refresh the page.
 
+### One-command helper
+
+Run these from the project folder, in Git Bash on Windows or Terminal on a Mac:
+
+```sh
+bash .github/scripts/dev.sh doctor   # checks PHP, MySQL, the database and Apache; prints a fix for anything missing
+bash .github/scripts/dev.sh start    # starts Apache and MySQL, waits, and prints the app link
+bash .github/scripts/dev.sh seed     # creates library_db and loads the sample data (asks first: it erases local data)
+bash .github/scripts/dev.sh stop     # stops Apache and MySQL
+```
+
+If something doesn't work, start with `doctor`. The manual steps are below.
+
 | Task | Windows | Mac |
 | --- | --- | --- |
 | Start | XAMPP Control Panel: **Start** Apache and MySQL | `brew services start mariadb@10.11` then `brew services start httpd` |
