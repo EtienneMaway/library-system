@@ -12,7 +12,7 @@ $here = $_SERVER['SCRIPT_NAME'] ?? '';
 <header class="stacks">
     <a class="stacks__brand" href="<?= e(url('dashboard/index.php')) ?>">Library</a>
     <nav class="stacks__nav" aria-label="Main">
-        <?php foreach ($links as $path => $label):
+        <?php foreach ($links as $path => $label) :
             $section = dirname($path);
             $current = str_contains($here, "/$section/"); ?>
             <a href="<?= e(url($path)) ?>"<?= $current ? ' aria-current="page"' : '' ?>><?= e($label) ?></a>

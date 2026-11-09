@@ -30,7 +30,7 @@ document.addEventListener('submit', function (event) {
         if (!button) return;
         var next = current() === 'dark' ? 'light' : 'dark';
         root.setAttribute('data-theme', next);
-        try { localStorage.setItem('theme', next); } catch (e) {}
+        try { localStorage.setItem('theme', next); } catch { /* storage blocked: keep the choice for this visit only */ }
         paint();
     });
 

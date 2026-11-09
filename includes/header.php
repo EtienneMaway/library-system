@@ -24,12 +24,12 @@ $page_title = $page_title ?? 'Library';
     <script src="<?= e(url('assets/js/app.js')) ?>" defer></script>
 </head>
 <body>
-<?php if (!empty($_SESSION['user_id'])): ?>
+<?php if (!empty($_SESSION['user_id'])) : ?>
     <?php require __DIR__ . '/navbar.php'; ?>
-<?php else: ?>
+<?php else : ?>
     <div class="theme-corner"><?= theme_toggle() ?></div>
 <?php endif; ?>
 <main class="page">
-<?php foreach (take_flashes() as $flash): ?>
+<?php foreach (take_flashes() as $flash) : ?>
     <p class="flash flash--<?= e($flash['type']) ?>" role="status"><?= e($flash['message']) ?></p>
 <?php endforeach; ?>

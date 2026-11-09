@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<ruleset name="library-system">
+    <description>PSR-12, relaxed for pages that mix PHP and HTML.</description>
+    <file>../..</file>
+    <exclude-pattern>*/.github/*</exclude-pattern>
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+
+    <rule ref="PSR12">
+        <!-- Pages run code and print HTML in one file by design. -->
+        <exclude name="PSR1.Files.SideEffects"/>
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+
+    <!-- footer.php is pure HTML. -->
+    <rule ref="Internal.NoCodeFound">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Generic.PHP.ForbiddenFunctions">
+        <properties>
+            <property name="forbiddenFunctions" type="array">
+                <element key="phpinfo" value="null"/>
+                <element key="var_dump" value="null"/>
+                <element key="print_r" value="null"/>
+                <element key="mysqli_query" value="null"/>
+                <element key="md5" value="password_hash"/>
+                <element key="sha1" value="password_hash"/>
+                <element key="eval" value="null"/>
+            </property>
+        </properties>
+    </rule>
+    <rule ref="Generic.PHP.DeprecatedFunctions"/>
+    <rule ref="Squiz.PHP.Eval"/>
+    <rule ref="Generic.CodeAnalysis.EmptyStatement"/>
+    <rule ref="Generic.CodeAnalysis.UnconditionalIfStatement"/>
+</ruleset>

@@ -1,0 +1,17 @@
+parameters:
+    level: 5
+    paths:
+        - ../../index.php
+        - ../../config
+        - ../../includes
+        - ../../auth
+        - ../../dashboard
+        - ../../books
+        - ../../members
+        - ../../loans
+        - ../../authors
+        - ../../categories
+    # $pdo comes from config/database.php through require_once.
+    ignoreErrors:
+        - identifier: variable.undefined
+          message: '#^Variable \$(pdo|page_title) might not be defined\.$#'

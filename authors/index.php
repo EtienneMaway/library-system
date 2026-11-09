@@ -65,14 +65,14 @@ require __DIR__ . '/../includes/header.php';
     <table>
         <thead><tr><th>Name</th><th>Country</th><th class="num">Titles</th></tr></thead>
         <tbody>
-        <?php foreach ($authors as $author): ?>
+        <?php foreach ($authors as $author) : ?>
             <tr>
                 <td><?= e($author['name']) ?></td>
                 <td><?= e($author['country']) ?></td>
                 <td class="num"><?= e($author['titles']) ?></td>
             </tr>
         <?php endforeach; ?>
-        <?php if (!$authors): ?>
+        <?php if (!$authors) : ?>
             <tr><td colspan="3">No authors match that search.</td></tr>
         <?php endif; ?>
         </tbody>
@@ -80,7 +80,7 @@ require __DIR__ . '/../includes/header.php';
 </div>
 
 <h2>Add an author</h2>
-<?php foreach ($errors as $error): ?>
+<?php foreach ($errors as $error) : ?>
     <p class="flash flash--error" role="alert"><?= e($error) ?></p>
 <?php endforeach; ?>
 <form method="post" class="form">

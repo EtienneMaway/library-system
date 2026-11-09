@@ -38,7 +38,7 @@ require __DIR__ . '/../includes/header.php';
     <h1 class="slip__title">Library</h1>
     <p class="slip__sub">Staff sign-in</p>
 
-    <?php if ($error): ?>
+    <?php if ($error) : ?>
         <p class="flash flash--error" role="alert"><?= e($error) ?></p>
     <?php endif; ?>
 

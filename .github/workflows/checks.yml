@@ -1,0 +1,105 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  structure:
+    name: Folder structure
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash .github/scripts/check-structure.sh
+
+  security:
+    name: Security rules
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash .github/scripts/check-security.sh
+
+  php:
+    name: PHP lint and analysis
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        php: ['8.3', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: phpcs, phpstan
+          coverage: none
+      - name: Syntax
+        run: |
+          status=0
+          for f in $(git ls-files '*.php'); do php -l "$f" > /dev/null || status=1; done
+          exit $status
+      - name: Code style (PSR-12)
+        run: phpcs --standard=.github/linters/phpcs.xml
+      - name: Static analysis (PHPStan)
+        run: phpstan analyse --configuration=.github/linters/phpstan.neon --no-progress --memory-limit=512M
+
+  frontend:
+    name: JavaScript and CSS lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: ESLint
+        run: npx --yes eslint@9.17.0 --config .github/linters/eslint.config.mjs assets/js
+      - name: Stylelint
+        run: npx --yes stylelint@16.12.0 --config .github/linters/stylelint.json "assets/css/**/*.css"
+
+  database:
+    name: Database import and app smoke test
+    runs-on: ubuntu-24.04
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, mbstring
+          coverage: none
+      - name: Install the MariaDB client and socat
+        run: sudo apt-get update -q && sudo apt-get install -y -q mariadb-client socat
+      - name: Import the schema and check the sample data
+        env:
+          MYSQL: mariadb -uroot -h127.0.0.1 -P3306
+        run: bash .github/scripts/check-database.sh
+      - name: Start the app
+        run: |
+          # config/database.php connects to "localhost", which PHP opens as a socket, as on XAMPP.
+          # socat turns that socket into a connection to the MariaDB container.
+          socat UNIX-LISTEN:/tmp/mysql.sock,fork,mode=777 TCP:127.0.0.1:3306 &
+          mkdir -p /tmp/www && ln -s "$GITHUB_WORKSPACE" /tmp/www/library-system
+          php -d pdo_mysql.default_socket=/tmp/mysql.sock -d display_errors=1 -S 127.0.0.1:8000 -t /tmp/www > /tmp/php.log 2>&1 &
+          sleep 2
+      - name: Smoke test
+        env:
+          BASE_URL: http://127.0.0.1:8000/library-system
+        run: bash .github/scripts/check-smoke.sh
+      - name: Server log
+        if: failure()
+        run: cat /tmp/php.log

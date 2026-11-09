@@ -1,4 +1,5 @@
 <?php
+
 // Put this at the very top of every protected page, before any output.
 require_once __DIR__ . '/functions.php';
 

@@ -1,4 +1,5 @@
 <?php
+
 // The only database connection in the project. Load it with require_once.
 $host = 'localhost';
 $db   = 'library_db';

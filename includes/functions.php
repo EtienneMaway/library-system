@@ -1,4 +1,5 @@
 <?php
+
 // Shared helpers. Every page gets these through auth_check.php or login.php.
 
 if (session_status() === PHP_SESSION_NONE) {

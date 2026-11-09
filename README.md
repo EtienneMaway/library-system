@@ -226,15 +226,52 @@ Group members and who builds what: [docs/team.html](docs/team.html).
 
 Pages showing a "Not built yet" box are waiting for their owner. Delete the `page_todo()` call when you build the page.
 
-**Commit your work.** The brief marks regular commits from every member, so commit from your own GitHub account:
+**Commit your work.** The brief marks regular commits from every member, so commit from your own GitHub account. Only the repository owner can push to `main` or merge, so everyone else works on a fork and sends a pull request:
+
+1. On GitHub, click **Fork** on this repository.
+2. Clone your fork and connect it to the main repository:
+
+   ```sh
+   git clone https://github.com/<your-username>/library-system.git
+   cd library-system
+   git remote add upstream <main-repository-url>
+   ```
+
+3. Work on a branch named after your area, then push it to your fork:
+
+   ```sh
+   git checkout -b books
+   git add books/
+   git commit -m "Add the books list with search"
+   git push -u origin books
+   ```
+
+4. On GitHub, open a pull request from your branch to `main` on the main repository, and fill in the template.
+
+Before each work session, get everyone else's changes with `git checkout main`, `git pull upstream main` and `git push origin main`.
+
+Your commits keep your name when the pull request is merged, so they count as yours.
+
+### Checks on every pull request
+
+GitHub runs these automatically. A pull request cannot be merged until all of them pass.
+
+| Check | What it catches |
+| --- | --- |
+| Folder structure | Missing required files, files loose in the root, folders not in the brief, capital letters or spaces in names, a second database connection |
+| Security rules | SQL built from variables, user input printed without `e()`, pages without the login check, POST forms without `csrf_field()`, `phpinfo()`, debug output, database errors shown to users |
+| PHP lint and analysis | Syntax errors on PHP 8.3 and 8.5, PSR-12 code style, bugs found by PHPStan |
+| JavaScript and CSS lint | Unused or undefined variables, invalid CSS |
+| Database import and app smoke test | `library_db.sql` must import twice on MariaDB 10.11 with the minimum sample data, `queries.sql` must run, and every page must load after logging in with no PHP errors |
+
+Open the failed check on the pull request page to see which file and line to fix. Push the fix to the same branch and the checks run again.
+
+You can run most checks on your own computer before pushing. Git Bash on Windows or Terminal on a Mac:
 
 ```sh
-git checkout -b books        # a branch named after your area
-git add books/
-git commit -m "Add the books list with search"
-git push -u origin books
+bash .github/scripts/check-structure.sh
+bash .github/scripts/check-security.sh
+for f in $(git ls-files '*.php'); do php -l "$f"; done
 ```
-
-Then open a pull request to `main` on GitHub. Before each work session, run `git checkout main` and `git pull` to get everyone else's changes.
 
 **Before submitting,** one member follows only this README on a fresh Windows XAMPP install, and the group fixes whatever fails.
