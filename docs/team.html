@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LMS Group Roster</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,600&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* Layout: a card-catalogue cabinet. Each workstream is a drawer, labelled with its Dewey class. Lamplight theme. */
+:root {
+  --ground: #ecebf0; --sheet: #f6f5f9; --ink: #22212e; --soft: #5f5d70; --line: #cfcdd9;
+  --bay: #2a2840; --bay-ink: #ecebf3; --label: #d6a54c; --label-ink: #22212e; --stamp: #a8433a;
+  --display: "Fraunces", Georgia, serif;
+  --body: "Atkinson Hyperlegible", Verdana, sans-serif;
+  --typed: "Courier Prime", "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #191a24; --sheet: #20212d; --ink: #dcdbe6; --soft: #9b9ab0; --line: #30313f;
+    --bay: #13141c; --bay-ink: #dcdbe6; --label-ink: #191a24; --stamp: #ec8f80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #191a24; --sheet: #20212d; --ink: #dcdbe6; --soft: #9b9ab0; --line: #30313f;
+  --bay: #13141c; --bay-ink: #dcdbe6; --label-ink: #191a24; --stamp: #ec8f80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 1rem/1.5 var(--body); }
+.wrap {
+  max-width: 70rem; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+header.top { background: var(--bay); color: var(--bay-ink); border-bottom: 3px solid var(--label); }
+header.top .wrap { padding-block: 2.25rem 1.75rem; }
+.top h1 { margin: 0; font: 600 clamp(2.5rem, 8vw, 4.5rem)/1.05 var(--display); text-wrap: balance; }
+.top p { max-width: 42rem; margin: 1rem 0 0; }
+h2 { font: 600 1.75rem/1.2 var(--display); margin: 0 0 0.75rem; }
+main.wrap { display: grid; gap: 2.75rem; padding-block: 2rem 3rem; }
+section { min-width: 0; }
+
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: var(--sheet); }
+th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: baseline; }
+th { font: 700 0.75rem var(--typed); letter-spacing: 0.06em; text-transform: uppercase; color: var(--soft); }
+td.call { font-family: var(--typed); white-space: nowrap; }
+td.name { font-weight: 700; }
+
+.drawers { display: grid; gap: 1rem; }
+.drawer { background: var(--sheet); border: 1px solid var(--line); min-width: 0; }
+.drawer > header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem; border-bottom: 1px solid var(--line); }
+.tag { padding: 0.125rem 0.625rem; background: var(--label); color: var(--label-ink);
+  font: 700 1rem var(--typed); border: 1px solid var(--label-ink); }
+.drawer h3 { margin: 0; font: 600 1.375rem/1.2 var(--display); flex: 1 1 14rem; }
+.who { font-weight: 700; }
+.drawer dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin: 0; }
+.drawer dl > div { padding: 0.75rem 1rem; min-width: 0; }
+.drawer dt { font: 700 0.75rem var(--typed); letter-spacing: 0.06em; text-transform: uppercase; color: var(--soft); }
+.drawer dd { margin: 0.25rem 0 0; }
+.drawer code { font: 0.875rem var(--typed); overflow-wrap: anywhere; }
+
+ol.order { display: grid; gap: 0.5rem; margin: 0; padding-left: 1.5rem; max-width: 46rem; }
+ul.rules { display: grid; gap: 0.5rem; margin: 0; padding-left: 1.25rem; max-width: 46rem; }
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <h1>Who builds what</h1>
+  <p>Group Sixteen. Library Management System, Database 2, CAT 2. Ten workstreams. Each one runs from the table to the screen to the part of the live demo that proves it works. Call numbers are real Dewey classes for that area of work.</p>
+</div></header>
+
+<main class="wrap">
+  <section>
+    <h2>Group members</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Call no.</th><th>Member</th><th>Workstream</th></tr></thead>
+      <tbody>
+        <tr><td class="call">658.404</td><td class="name">Antonia Nyakato</td><td>Project management</td></tr>
+        <tr><td class="call">005.8</td><td class="name">Maway Abili Etienne</td><td>Foundation, login and security</td></tr>
+        <tr><td class="call">005.74</td><td class="name">Lukwago Joseph Bakumpe</td><td>Database design and reports</td></tr>
+        <tr><td class="call">025.3</td><td class="name">Mugalu Kevin</td><td>Books</td></tr>
+        <tr><td class="call">025.4</td><td class="name">Atyang Sarah</td><td>Authors and categories</td></tr>
+        <tr><td class="call">025.5</td><td class="name">Anai Achiek Wel Alith</td><td>Members</td></tr>
+        <tr><td class="call">025.6 I</td><td class="name">Unguech Unuech William Mawut</td><td>Issuing loans</td></tr>
+        <tr><td class="call">025.6 R</td><td class="name">Lwoto Josiah Jared</td><td>Loan returns and history</td></tr>
+        <tr><td class="call">001.4</td><td class="name">Ibrahim Ali Artan</td><td>Dashboard and reports</td></tr>
+        <tr><td class="call">005.437</td><td class="name">Ali Henry Fred Alimo</td><td>Layout, phone support and rule testing</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Responsibilities</h2>
+    <div class="drawers">
+
+      <article class="drawer">
+        <header><span class="tag">658.404</span><h3>Project management</h3><span class="who">Antonia Nyakato</span></header>
+        <dl>
+          <div><dt>Plan</dt><dd>Run the task board against the seven stages in the brief. Hold a short check-in each week and keep the notes.</dd></div>
+          <div><dt>Lecturer</dt><dd>Get the blanks in the brief confirmed: deadline, submission platform, demo length and AI policy.</dd></div>
+          <div><dt>Delivery</dt><dd>Collect every member's section into <code>docs/report.pdf</code>. Build <code>LMS_[group name].zip</code> and submit it.</dd></div>
+          <div><dt>Demo proof</dt><dd>Write the demo running order. Check that every member has commits on GitHub and can explain their code.</dd></div>
+        </dl>
+      </article>
+
+      <article class="drawer">
+        <header><span class="tag">005.8</span><h3>Foundation, login and security</h3><span class="who">Maway Abili Etienne</span></header>
+        <dl>
+          <div><dt>Database</dt><dd><code>users</code> table and test accounts.</dd></div>
+          <div><dt>Back end</dt><dd><code>config/</code>, <code>includes/</code>, <code>auth/</code>: sessions, password hashing, CSRF tokens. Admin and librarian limits.</dd></div>
+          <div><dt>Screen</dt><dd>Login page, shared header, navigation and footer. Reviews and merges pull requests.</dd></div>
+          <div><dt>Demo proof</dt><dd>Open a protected page while logged out. Show a wrong password failing and a hash in the table.</dd></div>
+        </dl>
+      </article>
+
+      <article class="drawer">
+        <header><span class="tag">005.74</span><h3>Database design and reports</h3><span class="who">Lukwago Joseph Bakumpe</span></header>
+        <dl>
+          <div><dt>Database</dt><dd>Keep <code>library_db.sql</code> rebuilding from nothing. Final <code>erd.png</code>. Finish <code>queries.sql</code>.</dd></div>
+          <div><dt>Back end</dt><dd>Add a database-level guard against two open loans of one book by one member.</dd></div>
+          <div><dt>Report</dt><dd>The ERD and 3NF section, table by table.</dd></div>
+          <div><dt>Demo proof</dt><dd>Import the file into an empty server. Run each JOIN and aggregate query and explain the result.</dd></div>
+        </dl>
+      </article>
+
+      <article class="drawer">
+        <header><span class="tag">025.3</span><h3>Books</h3><span class="who">Mugalu Kevin</span></header>
+        <dl>
+          <div><dt>Database</dt><dd>Queries joining books to authors and categories.</dd></div>
+          <div><dt>Back end</dt><dd>Create, edit and delete with validation. Block deleting a book with unreturned loans.</dd></div>
+          <div><dt>Screen</dt><dd><code>books/</code>: list, search by title, filter by author and category, forms.</dd></div>
+          <div><dt>Demo proof</dt><dd>All four operations on a book. Try to delete a book that is out on loan.</dd></div>
+        </dl>
+      </article>
+
+      <article class="drawer">
+        <header><span class="tag">025.4</span><h3>Authors and categories</h3><span class="who">Atyang Sarah</span></header>
+        <dl>
+          <div><dt>Database</dt><dd>Check both tables and their foreign keys from books.</dd></div>
+          <div><dt>Back end</dt><dd>Extend <code>authors/</code> with edit and guarded delete. Build <code>categories/</code> the same way.</dd></div>
+          <div><dt>Screen</dt><dd>Both list and add pages. Supply the dropdown data for the book forms.</dd></div>
+          <div><dt>Demo proof</dt><dd>Add a category and pick it on a new book. Try to delete an author who has books.</dd></div>
+        </dl>
+      </article>
+
+      <article class="drawer">
+        <header><span class="tag">025.5</span><h3>Members</h3><span class="who">Anai Achiek Wel Alith</span></header>
+        <dl>
+          <div><dt>Database</dt><dd>Member status, and the count of books each member has out.</dd></div>
+          <div><dt>Back end</dt><dd>Create, edit and delete with validation. Block deleting a member with unreturned books.</dd></div>
+          <div><dt>Screen</dt><dd><code>members/</code>: list, search by name, filter by status, forms, suspend and reactivate.</dd></div>
+          <div><dt>Demo proof</dt><dd>All four operations on a member. Add a duplicate email. Delete a member who holds a book.</dd></div>
+        </dl>
+      </article>
+
+      <article class="drawer">
+        <header><span class="tag">025.6 I</span><h3>Issuing loans</h3><span class="who">Unguech Unuech William Mawut</span></header>
+        <dl>
+          <div><dt>Database</dt><dd>Transaction: insert the loan and reduce available copies together, or neither.</dd></div>
+          <div><dt>Back end</dt><dd>Enforce no copies left, suspended member and same book twice. Set the due date to 14 days.</dd></div>
+          <div><dt>Screen</dt><dd><code>loans/issue.php</code>: choose a member and a book, see the due date.</dd></div>
+          <div><dt>Demo proof</dt><dd>Issue a book, then try to break each of the three rules on purpose.</dd></div>
+        </dl>
+      </article>
+
+      <article class="drawer">
+        <header><span class="tag">025.6 R</span><h3>Loan returns and history</h3><span class="who">Lwoto Josiah Jared</span></header>
+        <dl>
+          <div><dt>Database</dt><dd>Transaction: set the return date and add the copy back together, or neither.</dd></div>
+          <div><dt>Back end</dt><dd><code>loans/return.php</code>. Refuse a loan that was already returned.</dd></div>
+          <div><dt>Screen</dt><dd><code>loans/index.php</code>: list, search by member, filter by out, returned and overdue.</dd></div>
+          <div><dt>Demo proof</dt><dd>Return a book and show the copy count rise. Filter to the overdue loans.</dd></div>
+        </dl>
+      </article>
+
+      <article class="drawer">
+        <header><span class="tag">001.4</span><h3>Dashboard and reports</h3><span class="who">Ibrahim Ali Artan</span></header>
+        <dl>
+          <div><dt>Database</dt><dd>Fines table, or a calculation from days overdue. Pick one and defend it.</dd></div>
+          <div><dt>Back end</dt><dd>Bonus marks: overdue fines, pagination and CSV export.</dd></div>
+          <div><dt>Screen</dt><dd><code>dashboard/</code>: overdue list and a chart of loans per category.</dd></div>
+          <div><dt>Demo proof</dt><dd>Issue or return a book and show the dashboard numbers change. Open an exported CSV.</dd></div>
+        </dl>
+      </article>
+
+      <article class="drawer">
+        <header><span class="tag">005.437</span><h3>Layout, phone support and rule testing</h3><span class="who">Ali Henry Fred Alimo</span></header>
+        <dl>
+          <div><dt>Screen</dt><dd><code>assets/</code>: forms and tables on every page, phone layout, delete prompts, messages after every action.</dd></div>
+          <div><dt>Testing</dt><dd>Keep a checklist of every business rule, and try to break each one before the demo.</dd></div>
+          <div><dt>Clean run</dt><dd>Follow only the README on a fresh Windows XAMPP. Report anything that fails.</dd></div>
+          <div><dt>Demo proof</dt><dd>Show the system on a phone-width screen. Take the CRUD screenshots for the report.</dd></div>
+        </dl>
+      </article>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Build order</h2>
+    <ol class="order">
+      <li>Database and login first. Everything else depends on them, and both already run in the first commit.</li>
+      <li>Authors and categories, because the book forms need their dropdowns.</li>
+      <li>Books and members side by side.</li>
+      <li>Issuing, then returns. Both need real books and members.</li>
+      <li>Dashboard, layout and rule testing throughout, with a full pass at the end.</li>
+      <li>Fresh XAMPP test, report and demo rehearsal.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Working rules</h2>
+    <ul class="rules">
+      <li>Commit from your own GitHub account, in small steps. The brief marks regular commits from every member.</li>
+      <li>Work on a branch named after your area, such as <code>books</code>, and open a pull request to <code>main</code>.</li>
+      <li>Copy the pattern in <code>authors/index.php</code> for new pages. Replace the "Not built yet" box when you build a page.</li>
+      <li>Learn more than your own part. Any member can be asked to explain any code, and a member who can't is marked down individually.</li>
+      <li>Write one report paragraph for your part, plus your screenshots, and give them to Antonia Nyakato.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
