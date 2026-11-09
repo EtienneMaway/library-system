@@ -22,9 +22,9 @@ for d in assets/css assets/js assets/images docs/screenshots; do
   [ -d "$d" ] || problem "Missing required folder: $d"
 done
 
-# Only index.php and README.md may sit in the root. Dot files (.github) are tooling.
+# Only index.php, README.md and composer.json may sit in the root. Dot files (.github) are tooling.
 while IFS= read -r f; do
-  case "$f" in index.php|README.md) ;; *) problem "Loose file in the project root: $f (move it into a folder)";; esac
+  case "$f" in index.php|README.md|composer.json) ;; *) problem "Loose file in the project root: $f (move it into a folder)";; esac
 done < <(git ls-files | grep -v '/' | grep -v '^\.')
 
 allowed_top="assets auth authors books categories config dashboard database docs includes loans members"

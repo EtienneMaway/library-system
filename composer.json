@@ -1,0 +1,32 @@
+{
+    "name": "group-sixteen/library-system",
+    "description": "Library Management System, DB II CAT 2. Composer is used only to run the scripts below; there are no packages.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.0"
+    },
+    "config": {
+        "process-timeout": 0
+    },
+    "scripts": {
+        "dev:doctor": "bash .github/scripts/dev.sh doctor",
+        "dev:start": "bash .github/scripts/dev.sh start",
+        "dev:stop": "bash .github/scripts/dev.sh stop",
+        "dev:seed": "bash .github/scripts/dev.sh seed",
+        "code:check": "bash .github/scripts/check-all.sh",
+        "code:check:full": "bash .github/scripts/check-all.sh --full",
+        "code:fix": "bash .github/scripts/check-all.sh --fix",
+        "hooks:install": "git config core.hooksPath .github/hooks"
+    },
+    "scripts-descriptions": {
+        "dev:doctor": "Check PHP, MySQL, the database and Apache, and print a fix for anything missing",
+        "dev:start": "Start Apache and MySQL and print the app link",
+        "dev:stop": "Stop Apache and MySQL",
+        "dev:seed": "Create library_db and load the sample data (erases local data)",
+        "code:check": "Run the code checks GitHub runs",
+        "code:check:full": "Code checks plus the database import and app smoke test",
+        "code:fix": "Fix PHP code style automatically",
+        "hooks:install": "Run the code checks before every git push"
+    }
+}

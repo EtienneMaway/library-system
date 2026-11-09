@@ -139,18 +139,28 @@ After logging in, the dashboard should show 10 titles, 8 active members and 3 ov
 
 There is no build step and no separate backend server. Apache runs the PHP files and sends the pages to the browser. Edit a file, save it, and refresh the page.
 
-### One-command helper
+### Project commands (Composer)
 
-Run these from the project folder, in Git Bash on Windows or Terminal on a Mac:
+Composer is PHP's package manager. Here it only runs the project's commands, much like `npm run`. There are no packages to install.
 
-```sh
-bash .github/scripts/dev.sh doctor   # checks PHP, MySQL, the database and Apache; prints a fix for anything missing
-bash .github/scripts/dev.sh start    # starts Apache and MySQL, waits, and prints the app link
-bash .github/scripts/dev.sh seed     # creates library_db and loads the sample data (asks first: it erases local data)
-bash .github/scripts/dev.sh stop     # stops Apache and MySQL
-```
+Install it once:
+- **Mac:** `brew install composer`
+- **Windows:** download Composer-Setup.exe from getcomposer.org and pick `C:\xampp\php\php.exe` when it asks for PHP.
 
-If something doesn't work, start with `doctor`. The manual steps are below.
+Then run these from the project folder. On Windows, use Git Bash.
+
+| Command | What it does |
+| --- | --- |
+| `composer dev:doctor` | Checks PHP, MySQL, the database and Apache, and prints a fix for anything missing |
+| `composer dev:start` | Starts Apache and MySQL and prints the app link |
+| `composer dev:stop` | Stops Apache and MySQL |
+| `composer dev:seed` | Creates `library_db` with the sample data, asking first because it erases local data (`composer dev:seed -- --yes` skips the question) |
+| `composer code:check` | Runs the code checks GitHub runs |
+| `composer code:check:full` | Runs the code checks plus the database import and the app test |
+| `composer code:fix` | Fixes PHP code style automatically |
+| `composer hooks:install` | Runs the checks before every `git push` (once per clone) |
+
+`composer list` shows them all. Without Composer, run the scripts directly, for example `bash .github/scripts/dev.sh doctor` or `bash .github/scripts/check-all.sh --fix`. If something doesn't work, start with `composer dev:doctor`. The manual steps are below.
 
 | Task | Windows | Mac |
 | --- | --- | --- |
