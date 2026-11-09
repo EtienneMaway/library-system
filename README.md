@@ -266,12 +266,24 @@ GitHub runs these automatically. A pull request cannot be merged until all of th
 
 Open the failed check on the pull request page to see which file and line to fix. Push the fix to the same branch and the checks run again.
 
-You can run most checks on your own computer before pushing. Git Bash on Windows or Terminal on a Mac:
+### Run the checks on your computer
+
+Run them before every push, from the project folder, in Git Bash on Windows or Terminal on a Mac:
 
 ```sh
-bash .github/scripts/check-structure.sh
-bash .github/scripts/check-security.sh
-for f in $(git ls-files '*.php'); do php -l "$f"; done
+bash .github/scripts/check-all.sh           # code checks, takes about a minute
+bash .github/scripts/check-all.sh --full    # also the database and app test, before a pull request
+bash .github/scripts/check-all.sh --fix     # fixes PHP code style automatically
+```
+
+`--full` resets `library_db` to the sample data, and needs Apache and MySQL running.
+
+It needs PHP (XAMPP's is found automatically) and an internet connection the first time, to download the PHP checkers. The JavaScript and CSS checks need [Node.js](https://nodejs.org); without it they are skipped, but GitHub still runs them.
+
+**Make it automatic.** Run this once in your clone, and the code checks run every time you `git push`. A failing check stops the push.
+
+```sh
+git config core.hooksPath .github/hooks
 ```
 
 **Before submitting,** one member follows only this README on a fresh Windows XAMPP install, and the group fixes whatever fails.

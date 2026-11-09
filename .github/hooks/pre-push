@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Runs the code checks before every git push. Turn it on once per clone:
+#   git config core.hooksPath .github/hooks
+# Skip it in an emergency with: git push --no-verify
+echo "Running checks before push..."
+bash "$(git rev-parse --show-toplevel)/.github/scripts/check-all.sh" || {
+  echo
+  echo "Push stopped: fix the failures above, commit, and push again."
+  exit 1
+}
