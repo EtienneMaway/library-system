@@ -3,6 +3,7 @@
     <description>PSR-12, relaxed for pages that mix PHP and HTML.</description>
     <file>../..</file>
     <exclude-pattern>*/.github/*</exclude-pattern>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
     <arg name="extensions" value="php"/>
     <arg name="colors"/>
     <arg value="sp"/>
