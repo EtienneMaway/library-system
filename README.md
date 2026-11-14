@@ -254,8 +254,8 @@ library-system/
 ├── books/               list, create, edit, delete
 ├── members/             list, create, edit, delete
 ├── loans/               list, issue, return
-├── authors/             list and add
-├── categories/          list and add
+├── authors/             list, add, edit and guarded delete
+├── categories/          list, add, edit and guarded delete
 ├── assets/              css, js, images
 └── docs/                report.pdf, screenshots, team page
 ```

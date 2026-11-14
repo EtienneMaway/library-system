@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $search = trim((string) ($_GET['q'] ?? ''));
 $stmt = $pdo->prepare(
-    'SELECT a.name, a.country, COUNT(b.book_id) AS titles
+    'SELECT a.author_id, a.name, a.country, COUNT(b.book_id) AS titles
      FROM authors a
      LEFT JOIN books b ON b.author_id = a.author_id
      WHERE a.name LIKE ? OR a.country LIKE ?
@@ -63,17 +63,21 @@ require __DIR__ . '/../includes/header.php';
 
 <div class="table-scroll">
     <table>
-        <thead><tr><th>Name</th><th>Country</th><th class="num">Titles</th></tr></thead>
+        <thead><tr><th>Name</th><th>Country</th><th class="num">Titles</th><th>Actions</th></tr></thead>
         <tbody>
         <?php foreach ($authors as $author) : ?>
             <tr>
                 <td><?= e($author['name']) ?></td>
                 <td><?= e($author['country']) ?></td>
                 <td class="num"><?= e($author['titles']) ?></td>
+                <td>
+                    <a href="<?= e(url('authors/edit.php?id=' . (int) $author['author_id'])) ?>">Edit</a>
+                    <a href="<?= e(url('authors/delete.php?id=' . (int) $author['author_id'])) ?>">Delete</a>
+                </td>
             </tr>
         <?php endforeach; ?>
         <?php if (!$authors) : ?>
-            <tr><td colspan="3">No authors match that search.</td></tr>
+            <tr><td colspan="4">No authors match that search.</td></tr>
         <?php endif; ?>
         </tbody>
     </table>
