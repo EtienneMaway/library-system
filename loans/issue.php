@@ -89,8 +89,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            error_log('Loan issue failed: ' . $exception->getMessage());
-            $error = 'The loan could not be issued because of a database error. Please try again.';
+            if (is_duplicate_error($exception)) {
+                // uq_loans_one_open_per_member_book caught a second open loan, for example two clicks at once.
+                $error = 'This member already has this book on loan.';
+            } else {
+                error_log('Loan issue failed: ' . $exception->getMessage());
+                $error = 'The loan could not be issued because of a database error. Please try again.';
+            }
         }
     }
 }
