@@ -2,96 +2,135 @@
 require_once __DIR__ . '/../includes/auth_check.php';
 require_once __DIR__ . '/../config/database.php';
 
-$page_title = 'Return a book';
-require __DIR__ . '/../includes/header.php';
+/**
+ * Record a return inside the open transaction.
+ * Returns the message to show when it cannot be recorded, or null when it worked.
+ */
+function return_loan(PDO $pdo, int $loan_id): ?string
+{
+    $stmt = $pdo->prepare(
+        'SELECT loan_id, book_id, date_returned
+         FROM loans
+         WHERE loan_id = ?
+         FOR UPDATE'
+    );
+    $stmt->execute([$loan_id]);
+    $loan = $stmt->fetch();
+    if (!$loan) {
+        return 'That loan could not be found.';
+    }
+    if ($loan['date_returned'] !== null) {
+        return 'This loan has already been returned.';
+    }
 
-$open_loans = [];
+    $stmt = $pdo->prepare(
+        'UPDATE books
+         SET available_copies = available_copies + 1
+         WHERE book_id = ?
+           AND available_copies < total_copies'
+    );
+    $stmt->execute([(int) $loan['book_id']]);
+    if ($stmt->rowCount() !== 1) {
+        return 'The book copy count is already at its limit; the return was not recorded.';
+    }
 
+    $stmt = $pdo->prepare(
+        'UPDATE loans
+         SET date_returned = CURDATE()
+         WHERE loan_id = ? AND date_returned IS NULL'
+    );
+    $stmt->execute([$loan_id]);
+    if ($stmt->rowCount() !== 1) {
+        return 'This loan has already been returned.';
+    }
+
+    return null;
+}
+
+$error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf();
 
-    $loan_id = filter_input(INPUT_POST, 'loan_id', FILTER_VALIDATE_INT);
+    $loan_id = is_string($_POST['loan_id'] ?? null) ? $_POST['loan_id'] : '';
+    if (!ctype_digit($loan_id) || (int) $loan_id < 1) {
+        $error = 'Choose a valid loan to return.';
+    } else {
+        try {
+            // One transaction: the loan is closed and the copy goes back on the shelf together, or neither happens.
+            $pdo->beginTransaction();
+            $error = return_loan($pdo, (int) $loan_id);
 
-    if ($loan_id === false || $loan_id === null || $loan_id < 1) {
-        flash('error', 'Please select an open loan to return.');
-        redirect('loans/return.php');
-    }
+            if ($error === null) {
+                $pdo->commit();
+                flash('success', 'Book return recorded.');
+                redirect('loans/index.php');
+            }
 
-    try {
-        $pdo->beginTransaction();
-
-        $loan_stmt = $pdo->prepare('SELECT loan_id, book_id, date_returned FROM loans WHERE loan_id = ? FOR UPDATE');
-        $loan_stmt->execute([$loan_id]);
-        $loan = $loan_stmt->fetch();
-
-        if ($loan === false) {
-            throw new RuntimeException('The selected loan was not found.');
-        }
-
-        if ($loan['date_returned'] !== null) {
-            throw new RuntimeException('This loan was already returned.');
-        }
-
-        $today = date('Y-m-d');
-        $close_stmt = $pdo->prepare('UPDATE loans SET date_returned = ? WHERE loan_id = ? AND date_returned IS NULL');
-        $close_stmt->execute([$today, $loan_id]);
-
-        if ($close_stmt->rowCount() !== 1) {
-            throw new RuntimeException('This loan was already returned.');
-        }
-
-        $book_stmt = $pdo->prepare('UPDATE books SET available_copies = available_copies + 1 WHERE book_id = ?');
-        $book_stmt->execute([$loan['book_id']]);
-
-        $pdo->commit();
-        flash('success', 'Book returned successfully.');
-        redirect('loans/index.php');
-    } catch (RuntimeException $e) {
-        if ($pdo->inTransaction()) {
             $pdo->rollBack();
+        } catch (PDOException $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('Loan return failed: ' . $exception->getMessage());
+            $error = 'The book could not be returned because of a database error. Please try again.';
         }
-        flash('error', $e->getMessage());
-        redirect('loans/return.php');
-    } catch (PDOException $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-        error_log('Loan return failed: ' . $e->getMessage());
-        flash('error', 'The return could not be saved. Please try again.');
-        redirect('loans/return.php');
     }
 }
 
-try {
-    $open_loans = $pdo->query(
-        'SELECT l.loan_id, m.full_name, b.title, l.due_date
-         FROM loans l
-         JOIN members m ON m.member_id = l.member_id
-         JOIN books b ON b.book_id = l.book_id
-         WHERE l.date_returned IS NULL
-         ORDER BY l.due_date ASC, m.full_name ASC, b.title ASC'
-    )->fetchAll();
-} catch (PDOException $e) {
-    error_log('Unable to load open loans: ' . $e->getMessage());
-    $open_loans = [];
-}
+$stmt = $pdo->query(
+    'SELECT l.loan_id, l.date_issued, l.due_date,
+            b.title, m.member_number, m.full_name
+     FROM loans l
+     JOIN books b ON b.book_id = l.book_id
+     JOIN members m ON m.member_id = l.member_id
+     WHERE l.date_returned IS NULL
+     ORDER BY l.due_date, m.full_name, b.title'
+);
+$loans = $stmt->fetchAll();
+
+$page_title = 'Return a book';
+require __DIR__ . '/../includes/header.php';
 ?>
 <h1>Return a book</h1>
-<?php if (empty($open_loans)) : ?>
-    <p>There are no open loans to return right now.</p>
-<?php else : ?>
-    <form method="post" class="stack">
-        <?= csrf_field() ?>
-        <label for="loan_id">Open loan</label>
-        <select id="loan_id" name="loan_id" required>
-            <option value="">Select a loan…</option>
-            <?php foreach ($open_loans as $loan) : ?>
-                <option value="<?= (int) $loan['loan_id'] ?>">
-                    <?= e($loan['full_name']) ?> — <?= e($loan['title']) ?> (due <?= e($loan['due_date']) ?>)
-                </option>
-            <?php endforeach; ?>
-        </select>
-        <button type="submit">Return book</button>
-    </form>
+
+<?php if ($error !== null) : ?>
+    <p class="flash flash--error" role="alert"><?= e($error) ?></p>
 <?php endif; ?>
+
+<?php if ($loans === []) : ?>
+    <p>There are no books currently on loan.</p>
+<?php else : ?>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Book</th>
+                    <th>Issued</th>
+                    <th>Due</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($loans as $loan) : ?>
+                    <tr>
+                        <td><?= e($loan['full_name']) ?> (<?= e($loan['member_number']) ?>)</td>
+                        <td><?= e($loan['title']) ?></td>
+                        <td><?= e($loan['date_issued']) ?></td>
+                        <td><?= e($loan['due_date']) ?></td>
+                        <td>
+                            <form method="post">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="loan_id" value="<?= e($loan['loan_id']) ?>">
+                                <button class="btn" type="submit">Record return</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif; ?>
+
+<p><a href="<?= e(url('loans/index.php')) ?>">Back to loans</a></p>
 <?php require __DIR__ . '/../includes/footer.php'; ?>
