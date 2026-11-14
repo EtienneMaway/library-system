@@ -11,7 +11,8 @@ token() { curl -s -b "$JAR" -c "$JAR" "$1" | sed -n 's/.*name="csrf_token" value
 
 pages="dashboard/index.php books/index.php books/create.php books/edit.php books/delete.php
 members/index.php members/create.php members/edit.php members/delete.php
-loans/index.php loans/issue.php loans/return.php authors/index.php categories/index.php"
+loans/index.php loans/issue.php loans/return.php authors/index.php authors/edit.php?id=1 authors/delete.php?id=1
+categories/index.php categories/edit.php?id=1 categories/delete.php?id=1"
 
 for p in $pages; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/$p")
