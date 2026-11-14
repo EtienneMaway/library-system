@@ -69,12 +69,17 @@ CREATE TABLE loans (
   date_issued   DATE NOT NULL,
   due_date      DATE NOT NULL,
   date_returned DATE NULL,
+  open_loan_guard TINYINT GENERATED ALWAYS AS (
+    IF(date_returned IS NULL, 1, NULL)
+  ) STORED,
   CONSTRAINT fk_loans_member FOREIGN KEY (member_id)
     REFERENCES members (member_id) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_loans_book FOREIGN KEY (book_id)
     REFERENCES books (book_id) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT ck_loans_due CHECK (due_date >= date_issued),
   CONSTRAINT ck_loans_returned CHECK (date_returned IS NULL OR date_returned >= date_issued),
+  CONSTRAINT uq_loans_one_open_per_member_book
+    UNIQUE (book_id, member_id, open_loan_guard),
   INDEX idx_loans_open (book_id, member_id, date_returned)
 ) ENGINE=InnoDB;
 
