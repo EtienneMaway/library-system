@@ -13,7 +13,7 @@ required=(
   books/index.php books/create.php books/edit.php books/delete.php
   members/index.php members/create.php members/edit.php members/delete.php
   loans/index.php loans/issue.php loans/return.php
-  authors/index.php categories/index.php
+  authors/index.php authors/edit.php authors/delete.php categories/index.php
 )
 for f in "${required[@]}"; do
   [ -f "$f" ] || problem "Missing required file: $f"
