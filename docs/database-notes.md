@@ -1,20 +1,20 @@
-# Lukwago Joseph — Database Design and Reports
+# Database design and reports: work notes (Lukwago Joseph Bakumpe)
 
 ## What I completed
 
-- Updated [`database/library_db.sql`](database/library_db.sql) so the database
+- Updated [`database/library_db.sql`](../database/library_db.sql) so the database
   itself prevents one member from having two open loans for the same book.
   Returned loans remain in the history and do not block a future loan.
-- Finished all four report queries in [`database/queries.sql`](database/queries.sql):
+- Finished all four report queries in [`database/queries.sql`](../database/queries.sql):
   open loans by member, loan totals by category, overdue loans with days overdue
   and member phone numbers, and books with their authors, categories, and copies
   currently out.
-- Finalized [`database/erd.png`](database/erd.png) to show the six tables and
+- Finalized [`database/erd.png`](../database/erd.png) to show the six tables and
   the open-loan guard.
 - Wrote the table-by-table normalization explanation in
-  [`docs/database-design.md`](docs/database-design.md), including the design's
+  [`docs/database-design.md`](database-design.md), including the design's
   assumptions and the inventory-counter caveat.
-- Extended [`.github/scripts/check-database.sh`](.github/scripts/check-database.sh)
+- Extended [`.github/scripts/check-database.sh`](../.github/scripts/check-database.sh)
   to test that a duplicate open loan is rejected and rolled back.
 
 ## How I approached the work
@@ -93,7 +93,7 @@ running.
 3. **Keep the ERD and schema in sync.** If tables, keys, or relationships
    change, update the diagram and normalization explanation in the same
    change.
-4. **Merge this section into the group report.** [`docs/database-design.md`](docs/database-design.md)
+4. **Merge this section into the group report.** [`docs/database-design.md`](database-design.md)
    is the report-ready database section; the team still needs to combine it
    with the other members' sections and produce the final submission PDF.
 
