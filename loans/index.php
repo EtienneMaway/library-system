@@ -107,4 +107,3 @@ require __DIR__ . '/../includes/header.php';
     </div>
 <?php endif; ?>
 <?php require __DIR__ . '/../includes/footer.php'; ?>
-

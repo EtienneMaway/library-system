@@ -2,6 +2,45 @@
 require_once __DIR__ . '/../includes/auth_check.php';
 require_once __DIR__ . '/../config/database.php';
 
+/**
+ * Check the three loan rules inside the open transaction, locking the rows it reads.
+ * Returns the message to show when a rule is broken, or null when the loan may go ahead.
+ */
+function issue_rule_error(PDO $pdo, int $member_id, int $book_id): ?string
+{
+    $stmt = $pdo->prepare('SELECT status FROM members WHERE member_id = ? FOR UPDATE');
+    $stmt->execute([$member_id]);
+    $member = $stmt->fetch();
+    if (!$member) {
+        return 'That member could not be found.';
+    }
+    if ($member['status'] !== 'active') {
+        return 'A suspended member cannot borrow books.';
+    }
+
+    $stmt = $pdo->prepare('SELECT available_copies FROM books WHERE book_id = ? FOR UPDATE');
+    $stmt->execute([$book_id]);
+    $book = $stmt->fetch();
+    if (!$book) {
+        return 'That book could not be found.';
+    }
+    if ((int) $book['available_copies'] < 1) {
+        return 'There are no available copies of that book.';
+    }
+
+    $stmt = $pdo->prepare(
+        'SELECT loan_id FROM loans
+         WHERE member_id = ? AND book_id = ? AND date_returned IS NULL
+         LIMIT 1 FOR UPDATE'
+    );
+    $stmt->execute([$member_id, $book_id]);
+    if ($stmt->fetch()) {
+        return 'This member already has this book on loan.';
+    }
+
+    return null;
+}
+
 $error = null;
 $member_id = '';
 $book_id = '';
@@ -17,62 +56,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Choose a valid book.';
     } else {
         try {
+            // One transaction: the loan is inserted and the copy count drops together, or neither happens.
             $pdo->beginTransaction();
+            $error = issue_rule_error($pdo, (int) $member_id, (int) $book_id);
 
-            $stmt = $pdo->prepare('SELECT status FROM members WHERE member_id = ? FOR UPDATE');
-            $stmt->execute([(int) $member_id]);
-            $member = $stmt->fetch();
-            if (!$member) {
-                throw new DomainException('That member could not be found.');
-            }
-            if ($member['status'] !== 'active') {
-                throw new DomainException('A suspended member cannot borrow books.');
-            }
-
-            $stmt = $pdo->prepare('SELECT available_copies FROM books WHERE book_id = ? FOR UPDATE');
-            $stmt->execute([(int) $book_id]);
-            $book = $stmt->fetch();
-            if (!$book) {
-                throw new DomainException('That book could not be found.');
-            }
-            if ((int) $book['available_copies'] < 1) {
-                throw new DomainException('There are no available copies of that book.');
+            if ($error === null) {
+                $stmt = $pdo->prepare(
+                    'UPDATE books
+                     SET available_copies = available_copies - 1
+                     WHERE book_id = ? AND available_copies > 0'
+                );
+                $stmt->execute([(int) $book_id]);
+                if ($stmt->rowCount() !== 1) {
+                    $error = 'There are no available copies of that book.';
+                }
             }
 
-            $stmt = $pdo->prepare(
-                'SELECT loan_id FROM loans
-                 WHERE member_id = ? AND book_id = ? AND date_returned IS NULL
-                 LIMIT 1 FOR UPDATE'
-            );
-            $stmt->execute([(int) $member_id, (int) $book_id]);
-            if ($stmt->fetch()) {
-                throw new DomainException('This member already has this book on loan.');
+            if ($error === null) {
+                $stmt = $pdo->prepare(
+                    'INSERT INTO loans (member_id, book_id, date_issued, due_date)
+                     VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY))'
+                );
+                $stmt->execute([(int) $member_id, (int) $book_id]);
+                $pdo->commit();
+
+                flash('success', 'Book issued. It is due in 14 days.');
+                redirect('loans/index.php');
             }
 
-            $stmt = $pdo->prepare(
-                'UPDATE books
-                 SET available_copies = available_copies - 1
-                 WHERE book_id = ? AND available_copies > 0'
-            );
-            $stmt->execute([(int) $book_id]);
-            if ($stmt->rowCount() !== 1) {
-                throw new DomainException('There are no available copies of that book.');
-            }
-
-            $stmt = $pdo->prepare(
-                'INSERT INTO loans (member_id, book_id, date_issued, due_date)
-                 VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY))'
-            );
-            $stmt->execute([(int) $member_id, (int) $book_id]);
-            $pdo->commit();
-
-            flash('success', 'Book issued. It is due in 14 days.');
-            redirect('loans/index.php');
-        } catch (DomainException $exception) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            $error = $exception->getMessage();
+            $pdo->rollBack();
         } catch (PDOException $exception) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();

@@ -2,6 +2,51 @@
 require_once __DIR__ . '/../includes/auth_check.php';
 require_once __DIR__ . '/../config/database.php';
 
+/**
+ * Record a return inside the open transaction.
+ * Returns the message to show when it cannot be recorded, or null when it worked.
+ */
+function return_loan(PDO $pdo, int $loan_id): ?string
+{
+    $stmt = $pdo->prepare(
+        'SELECT loan_id, book_id, date_returned
+         FROM loans
+         WHERE loan_id = ?
+         FOR UPDATE'
+    );
+    $stmt->execute([$loan_id]);
+    $loan = $stmt->fetch();
+    if (!$loan) {
+        return 'That loan could not be found.';
+    }
+    if ($loan['date_returned'] !== null) {
+        return 'This loan has already been returned.';
+    }
+
+    $stmt = $pdo->prepare(
+        'UPDATE books
+         SET available_copies = available_copies + 1
+         WHERE book_id = ?
+           AND available_copies < total_copies'
+    );
+    $stmt->execute([(int) $loan['book_id']]);
+    if ($stmt->rowCount() !== 1) {
+        return 'The book copy count is already at its limit; the return was not recorded.';
+    }
+
+    $stmt = $pdo->prepare(
+        'UPDATE loans
+         SET date_returned = CURDATE()
+         WHERE loan_id = ? AND date_returned IS NULL'
+    );
+    $stmt->execute([$loan_id]);
+    if ($stmt->rowCount() !== 1) {
+        return 'This loan has already been returned.';
+    }
+
+    return null;
+}
+
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf();
@@ -11,52 +56,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Choose a valid loan to return.';
     } else {
         try {
+            // One transaction: the loan is closed and the copy goes back on the shelf together, or neither happens.
             $pdo->beginTransaction();
+            $error = return_loan($pdo, (int) $loan_id);
 
-            $stmt = $pdo->prepare(
-                'SELECT loan_id, book_id, date_returned
-                 FROM loans
-                 WHERE loan_id = ?
-                 FOR UPDATE'
-            );
-            $stmt->execute([(int) $loan_id]);
-            $loan = $stmt->fetch();
-            if (!$loan) {
-                throw new DomainException('That loan could not be found.');
-            }
-            if ($loan['date_returned'] !== null) {
-                throw new DomainException('This loan has already been returned.');
+            if ($error === null) {
+                $pdo->commit();
+                flash('success', 'Book return recorded.');
+                redirect('loans/index.php');
             }
 
-            $stmt = $pdo->prepare(
-                'UPDATE books
-                 SET available_copies = available_copies + 1
-                 WHERE book_id = ?
-                   AND available_copies < total_copies'
-            );
-            $stmt->execute([(int) $loan['book_id']]);
-            if ($stmt->rowCount() !== 1) {
-                throw new DomainException('The book copy count is already at its limit; the return was not recorded.');
-            }
-
-            $stmt = $pdo->prepare(
-                'UPDATE loans
-                 SET date_returned = CURDATE()
-                 WHERE loan_id = ? AND date_returned IS NULL'
-            );
-            $stmt->execute([(int) $loan_id]);
-            if ($stmt->rowCount() !== 1) {
-                throw new DomainException('This loan has already been returned.');
-            }
-
-            $pdo->commit();
-            flash('success', 'Book return recorded.');
-            redirect('loans/index.php');
-        } catch (DomainException $exception) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            $error = $exception->getMessage();
+            $pdo->rollBack();
         } catch (PDOException $exception) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
