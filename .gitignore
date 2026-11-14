@@ -1,0 +1,3 @@
+# Created by `composer install`. This project has no packages, so never commit these.
+/vendor/
+/composer.lock
