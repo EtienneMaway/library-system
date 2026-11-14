@@ -96,3 +96,5 @@ running.
 4. **Merge this section into the group report.** [`docs/database-design.md`](docs/database-design.md)
    is the report-ready database section; the team still needs to combine it
    with the other members' sections and produce the final submission PDF.
+
+5. **Follow the processes in README.md**
