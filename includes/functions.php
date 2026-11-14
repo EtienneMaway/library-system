@@ -113,6 +113,33 @@ function is_in_use_error(PDOException $e): bool
     return in_array($e->errorInfo[1] ?? null, [1451, 1452], true);
 }
 
+/**
+ * Dropdown data for the book forms: [id => label], sorted by label.
+ * Usage in books/create.php and books/edit.php:
+ *   <select name="author_id" required><?= select_options(author_choices($pdo), $author_id, 'Choose an author') ?></select>
+ */
+function author_choices(PDO $pdo): array
+{
+    return $pdo->query('SELECT author_id, name FROM authors ORDER BY name')->fetchAll(PDO::FETCH_KEY_PAIR);
+}
+
+/** Same as author_choices(), for categories. */
+function category_choices(PDO $pdo): array
+{
+    return $pdo->query('SELECT category_id, name FROM categories ORDER BY name')->fetchAll(PDO::FETCH_KEY_PAIR);
+}
+
+/** Print <option> tags for a select, marking $selected. $placeholder adds an empty first option. */
+function select_options(array $choices, int|string|null $selected = null, ?string $placeholder = null): string
+{
+    $html = $placeholder !== null ? '<option value="">' . e($placeholder) . '</option>' : '';
+    foreach ($choices as $value => $label) {
+        $is_selected = $selected !== null && (string) $selected === (string) $value;
+        $html .= '<option value="' . e($value) . '"' . ($is_selected ? ' selected' : '') . '>' . e($label) . '</option>';
+    }
+    return $html;
+}
+
 /** The light and dark switch. assets/js/app.js fills in the icon and label. */
 function theme_toggle(): string
 {

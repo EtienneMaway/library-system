@@ -62,7 +62,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($error === null) {
                 $pdo->commit();
-                flash('success', 'Book return recorded.');
+
+                // Show the copy count going back up.
+                $stmt = $pdo->prepare(
+                    'SELECT b.title, b.available_copies, b.total_copies
+                     FROM loans l JOIN books b ON b.book_id = l.book_id
+                     WHERE l.loan_id = ?'
+                );
+                $stmt->execute([(int) $loan_id]);
+                $book = $stmt->fetch();
+                flash('success', sprintf(
+                    'Book return recorded. "%s" now has %d of %d copies on the shelf.',
+                    $book['title'],
+                    $book['available_copies'],
+                    $book['total_copies']
+                ));
                 redirect('loans/index.php');
             }
 
