@@ -37,6 +37,19 @@ check "overdue loans" 1 "SELECT COUNT(*) FROM loans WHERE date_returned IS NULL 
 check "JOIN queries in queries.sql" 3 "SELECT $(grep -ciE '^\s*(LEFT |RIGHT |INNER )?JOIN ' database/queries.sql)"
 check "aggregate queries in queries.sql" 1 "SELECT $(grep -ciE 'COUNT\(|SUM\(|GROUP BY' database/queries.sql)"
 
+duplicate_error=$($MYSQL library_db -e "
+  START TRANSACTION;
+  INSERT INTO loans (member_id, book_id, date_issued, due_date)
+  VALUES (1, 1, CURDATE(), CURDATE() + INTERVAL 14 DAY);
+  ROLLBACK" 2>&1) && duplicate_status=0 || duplicate_status=$?
+if [ "$duplicate_status" -eq 0 ]; then
+  echo "::error file=database/library_db.sql::The database allowed a duplicate open loan for one member and book."; fail=1
+elif ! printf '%s' "$duplicate_error" | grep -q "Duplicate entry"; then
+  echo "::error file=database/library_db.sql::Duplicate-loan test failed for an unexpected reason: $duplicate_error"; fail=1
+else
+  echo "ok  duplicate open loans are rejected by the database"
+fi
+
 mismatch=$($MYSQL -N library_db -e "
   SELECT COUNT(*) FROM (
     SELECT b.book_id FROM books b

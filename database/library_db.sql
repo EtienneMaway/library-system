@@ -69,12 +69,17 @@ CREATE TABLE loans (
   date_issued   DATE NOT NULL,
   due_date      DATE NOT NULL,
   date_returned DATE NULL,
+  open_loan_guard TINYINT GENERATED ALWAYS AS (
+    IF(date_returned IS NULL, 1, NULL)
+  ) STORED,
   CONSTRAINT fk_loans_member FOREIGN KEY (member_id)
     REFERENCES members (member_id) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_loans_book FOREIGN KEY (book_id)
     REFERENCES books (book_id) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT ck_loans_due CHECK (due_date >= date_issued),
   CONSTRAINT ck_loans_returned CHECK (date_returned IS NULL OR date_returned >= date_issued),
+  CONSTRAINT uq_loans_one_open_per_member_book
+    UNIQUE (book_id, member_id, open_loan_guard),
   INDEX idx_loans_open (book_id, member_id, date_returned)
 ) ENGINE=InnoDB;
 
@@ -82,15 +87,25 @@ CREATE TABLE users (
   user_id       INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   username      VARCHAR(40)  NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
+  email         VARCHAR(190) NOT NULL,
+  email_verified_at DATETIME NULL,
   full_name     VARCHAR(120) NOT NULL,
   role          ENUM('admin', 'librarian') NOT NULL DEFAULT 'librarian',
-  CONSTRAINT uq_users_username UNIQUE (username)
+  -- The one-time code emailed for confirming the address or resetting the password.
+  -- Only its hash is stored. They are NULL (attempts 0) when no code is waiting.
+  code_purpose  ENUM('verify', 'reset') NULL,
+  code_hash     VARCHAR(255) NULL,
+  code_expires_at DATETIME NULL,
+  code_sent_at  DATETIME NULL,
+  code_attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  CONSTRAINT uq_users_username UNIQUE (username),
+  CONSTRAINT uq_users_email UNIQUE (email)
 ) ENGINE=InnoDB;
 
 -- Test accounts only. The passwords are listed in README.md.
-INSERT INTO users (username, password_hash, full_name, role) VALUES
-  ('admin',     '$2y$12$XJb.D71ThIgzoliAmNoCIOneCGndWUP1f4jmZhhFyLNI/CABkG01W',     'Test Admin',     'admin'),
-  ('librarian', '$2y$12$u0hZ51RqBGibmZ.N38n6YOO0XWbJXXjVQwGGTC2w2maLm429mevOq', 'Test Librarian', 'librarian');
+INSERT INTO users (username, password_hash, email, email_verified_at, full_name, role) VALUES
+  ('admin',     '$2y$12$XJb.D71ThIgzoliAmNoCIOneCGndWUP1f4jmZhhFyLNI/CABkG01W',     'admin@library.test',     NOW(), 'Test Admin',     'admin'),
+  ('librarian', '$2y$12$u0hZ51RqBGibmZ.N38n6YOO0XWbJXXjVQwGGTC2w2maLm429mevOq', 'librarian@library.test', NOW(), 'Test Librarian', 'librarian');
 
 INSERT INTO authors (author_id, name, country) VALUES
   (1, 'Chinua Achebe',            'Nigeria'),

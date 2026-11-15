@@ -1,0 +1,3 @@
+# Never serve hidden files or folders: .env (the Resend key), .git, .github, .htaccess.
+# They answer 404 as if they did not exist.
+RedirectMatch 404 /\.

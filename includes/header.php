@@ -10,6 +10,8 @@ $page_title = $page_title ?? 'Library';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($page_title) ?> | Library</title>
     <script>
+        // Mark that JavaScript runs, so toasts can float and close themselves (see style.css).
+        document.documentElement.classList.add('js');
         // Apply the saved theme before the page draws, so it never flashes the wrong colours.
         try {
             var savedTheme = localStorage.getItem('theme');
@@ -30,6 +32,19 @@ $page_title = $page_title ?? 'Library';
     <div class="theme-corner"><?= theme_toggle() ?></div>
 <?php endif; ?>
 <main class="page">
-<?php foreach (take_flashes() as $flash) : ?>
-    <p class="flash flash--<?= e($flash['type']) ?>" role="status"><?= e($flash['message']) ?></p>
+<?php $toasts = take_flashes(); ?>
+<div class="toasts" aria-label="Notifications">
+<?php foreach ($toasts as $toast) :
+    $type = in_array($toast['type'], ['success', 'error', 'info'], true) ? $toast['type'] : 'info';
+    $title = ['success' => 'Done', 'error' => 'Something needs attention', 'info' => 'Heads up'][$type]; ?>
+    <div class="toast toast--<?= e($type) ?>" role="<?= $type === 'error' ? 'alert' : 'status' ?>" data-toast>
+        <span class="toast__icon" aria-hidden="true"><?= $type === 'success' ? '&#10003;' : ($type === 'error' ? '!' : 'i') ?></span>
+        <div class="toast__body">
+            <p class="toast__title"><?= e($title) ?></p>
+            <p class="toast__message"><?= e($toast['message']) ?></p>
+        </div>
+        <button type="button" class="toast__close" aria-label="Dismiss" data-toast-close>&times;</button>
+        <span class="toast__timer" aria-hidden="true"></span>
+    </div>
 <?php endforeach; ?>
+</div>

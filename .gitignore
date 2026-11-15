@@ -1,3 +1,9 @@
 # Created by `composer install`. This project has no packages, so never commit these.
 /vendor/
 /composer.lock
+
+# Settings for this computer, including the Resend API key. Copy .env.example to start.
+/.env
+
+# A local copy of Composer; install it globally instead (see README)
+/composer.phar

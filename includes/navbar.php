@@ -21,6 +21,7 @@ $here = $_SERVER['SCRIPT_NAME'] ?? '';
     <p class="stacks__user">
         <?= theme_toggle() ?>
         <span><?= e($_SESSION['full_name'] ?? '') ?></span>
+        <a href="<?= e(url('auth/change_password.php')) ?>">Change password</a>
         <a href="<?= e(url('auth/logout.php')) ?>">Log out</a>
     </p>
 </header>

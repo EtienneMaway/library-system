@@ -1,6 +1,6 @@
 # Library Management System
 
-**GitHub repository:** _add the link here after the first push_
+**GitHub repository:** _[Remote Link](https://github.com/EtienneMaway/library-system)_
 
 A web system that lets librarians manage books, members and loans from a browser. All data is stored in MySQL (MariaDB). Built with PHP, HTML, CSS and JavaScript by Group Sixteen for Database 2, CAT 2.
 
@@ -107,7 +107,7 @@ DirectoryIndex index.php index.html
 Alias /library-system /path/to/library-system
 <Directory /path/to/library-system>
     Options FollowSymLinks
-    AllowOverride None
+    AllowOverride All
     Require local
 </Directory>
 
@@ -149,12 +149,51 @@ Mac addresses use port 8080 because port 80 needs admin rights. Links inside the
 
 These are fake test accounts. Do not reuse the passwords anywhere.
 
-| Username | Password | Role |
-| --- | --- | --- |
-| `admin` | `admin123` | admin |
-| `librarian` | `library123` | librarian |
+| Username | Email | Password | Role |
+| --- | --- | --- | --- |
+| `admin` | `admin@library.test` | `admin123` | admin |
+| `librarian` | `librarian@library.test` | `library123` | librarian |
 
 After logging in, the dashboard should show 10 titles, 8 active members and 3 overdue loans.
+
+### Accounts and passwords
+
+- **Log in** with either your username or your email.
+- **Sign up** from the login page. You get a 6-digit code by email and type it in to confirm your address before the account opens. New accounts are always normal users (`librarian`). To make someone an admin, change their `role` to `admin` in phpMyAdmin.
+- **Forgot your password?** on the login page emails a 6-digit code. Type it with your new password.
+- **Change password:** once logged in, use *Change password* in the top bar. You need your current password.
+
+Codes last 15 minutes, allow 5 wrong tries, and a new one can be sent once a minute. Only a hash of each code is stored.
+
+### Email (Resend)
+
+The app sends its emails through [Resend](https://resend.com). The free tier is enough for this project. Each email has a branded HTML layout and a plain-text copy for email apps that block HTML.
+
+Settings live in a `.env` file in the project root. Git ignores it, so the API key never reaches GitHub, and `.htaccess` stops browsers from downloading it. Start from the example:
+
+```sh
+cp .env.example .env
+```
+
+| Setting | What it does |
+| --- | --- |
+| `APP_ENV` | `local` on your laptop, `production` on the live site. |
+| `RESEND_API_KEY` | Your key from <https://resend.com/api-keys>. |
+| `MAIL_FROM` | The sender, for example `"Library <onboarding@resend.dev>"`. Keep the quotes. |
+
+The two environments treat codes differently:
+
+| `APP_ENV` | What happens to codes |
+| --- | --- |
+| `local` (default) | Emailed if `RESEND_API_KEY` is set. If it is empty, or the send fails, the code is shown on screen instead. |
+| `production` | Always emailed. If sending fails, the user sees an error and the details go to the PHP error log. |
+
+To send real email:
+1. Create a free Resend account and an API key, and put the key in `RESEND_API_KEY`.
+2. **Local testing:** keep `MAIL_FROM="Library <onboarding@resend.dev>"`. Resend's test sender only delivers to the email you signed up to Resend with, so sign up in the app with that address.
+3. **Production:** verify a domain in Resend, set `MAIL_FROM` to an address on it, such as `"Library <no-reply@your-domain>"`, and set `APP_ENV=production`.
+
+Environment variables with the same names, set on a server, take priority over `.env`.
 
 ## Daily use
 
@@ -254,8 +293,8 @@ library-system/
 ├── books/               list, create, edit, delete
 ├── members/             list, create, edit, delete
 ├── loans/               list, issue, return
-├── authors/             list and add
-├── categories/          list and add
+├── authors/             list, add, edit and guarded delete
+├── categories/          list, add, edit and guarded delete
 ├── assets/              css, js, images
 └── docs/                report.pdf, screenshots, team page
 ```
