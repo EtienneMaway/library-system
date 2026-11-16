@@ -18,14 +18,18 @@ $page_title = $page_title ?? 'Library';
             if (savedTheme === 'light' || savedTheme === 'dark') {
                 document.documentElement.setAttribute('data-theme', savedTheme);
             }
+            // The same for the drawer on wide screens: open (icons and names) or closed (icons only).
+            if (localStorage.getItem('rail') === 'closed') {
+                document.documentElement.setAttribute('data-rail', 'closed');
+            }
         } catch (e) {}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,600&family=Courier+Prime:wght@400;700&display=swap">
-    <link rel="stylesheet" href="<?= e(url('assets/css/style.css')) ?>">
-    <script src="<?= e(url('assets/js/app.js')) ?>" defer></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Courier+Prime:wght@400;700&display=swap">
+    <link rel="stylesheet" href="<?= e(url('assets/css/style.css')) ?>?v=<?= (int) filemtime(__DIR__ . '/../assets/css/style.css') ?>">
+    <script src="<?= e(url('assets/js/app.js')) ?>?v=<?= (int) filemtime(__DIR__ . '/../assets/js/app.js') ?>" defer></script>
 </head>
-<body>
+<body<?= !empty($_SESSION['user_id']) ? ' class="app"' : '' ?>>
 <?php if (!empty($_SESSION['user_id'])) : ?>
     <?php require __DIR__ . '/navbar.php'; ?>
 <?php else : ?>

@@ -39,6 +39,60 @@ document.addEventListener('submit', function (event) {
     paint();
 })();
 
+// Navigation drawer. Wide screens: the toggle at its foot opens it (icons and names) or closes it
+// to icons only, remembered in this browser. Phones: it slides in from the left with the menu button
+// and slides out with the close button, a tap outside it, a link, or Esc.
+(function () {
+    var root = document.documentElement;
+    var drawer = document.getElementById('drawer');
+    if (!drawer) return;
+    var phone = window.matchMedia('(max-width: 52rem)');
+    var openButton = document.querySelector('[data-drawer-open]');
+    var toggle = document.querySelector('[data-rail-toggle]');
+
+    function paintToggle() {
+        var open = root.getAttribute('data-rail') !== 'closed';
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Collapse the menu' : 'Expand the menu');
+        toggle.querySelector('.rail__label').textContent = open ? 'Collapse' : 'Expand';
+    }
+
+    function slide(open) {
+        root.setAttribute('data-drawer', open ? 'open' : 'closed');
+        openButton.setAttribute('aria-expanded', String(open));
+        drawer.inert = phone.matches && !open;
+        if (!phone.matches) return;
+        if (open) {
+            var first = drawer.querySelector('[aria-current]') || drawer.querySelector('a');
+            if (first) first.focus();
+        } else if (drawer.contains(document.activeElement)) {
+            openButton.focus();
+        }
+    }
+
+    toggle.addEventListener('click', function () {
+        var close = root.getAttribute('data-rail') !== 'closed';
+        if (close) root.setAttribute('data-rail', 'closed');
+        else root.removeAttribute('data-rail');
+        try { localStorage.setItem('rail', close ? 'closed' : 'open'); } catch { /* storage blocked: keep it for this visit */ }
+        paintToggle();
+    });
+    openButton.addEventListener('click', function () { slide(true); });
+    document.querySelectorAll('[data-drawer-close]').forEach(function (el) {
+        el.addEventListener('click', function () { slide(false); });
+    });
+    drawer.addEventListener('click', function (event) {
+        if (phone.matches && event.target.closest('a')) slide(false);
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && root.getAttribute('data-drawer') === 'open') slide(false);
+    });
+    phone.addEventListener('change', function () { slide(false); });
+
+    paintToggle();
+    slide(false);
+})();
+
 // Toasts: success and info close after 5 seconds, errors after 8. Hover or focus pauses them. Esc closes all.
 (function () {
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');

@@ -44,7 +44,16 @@ $most = max(1, ...array_map(fn ($row) => (int) $row['loans'], $by_category ?: [[
 $page_title = 'Dashboard';
 require __DIR__ . '/../includes/header.php';
 ?>
-<h1>Dashboard</h1>
+<?php
+$hour = (int) date('G');
+$greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
+$first_name = explode(' ', trim($_SESSION['full_name'] ?? ''))[0];
+?>
+<section class="hero" aria-labelledby="hero-title">
+    <p class="hero__eyebrow">Dashboard</p>
+    <h1 class="hero__title" id="hero-title"><?= e($greeting) ?><?= $first_name !== '' ? ', ' . e($first_name) : '' ?></h1>
+    <p class="hero__lede"><?= e($totals['out_now']) ?> books are out on loan<?= $overdue ? ' and ' . count($overdue) . ' are overdue' : ', and none are overdue' ?>.</p>
+</section>
 <dl class="tally">
     <div><dt>Titles</dt><dd><?= e($totals['titles']) ?></dd></div>
     <div><dt>Copies on shelf</dt><dd><?= e($totals['on_shelf']) ?></dd></div>
