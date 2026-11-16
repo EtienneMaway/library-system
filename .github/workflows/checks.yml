@@ -38,7 +38,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          tools: phpcs, phpstan
+          tools: phpcs, phpstan:2.3.6
           coverage: none
       - name: Syntax
         run: |
@@ -48,7 +48,9 @@ jobs:
       - name: Code style (PSR-12)
         run: phpcs --standard=.github/linters/phpcs.xml
       - name: Static analysis (PHPStan)
-        run: phpstan analyse --configuration=.github/linters/phpstan.neon --no-progress --memory-limit=512M
+        run: |
+          phpstan --version || { echo "::error::setup-php did not install a working phpstan"; exit 1; }
+          phpstan analyse --configuration=.github/linters/phpstan.neon --no-progress --memory-limit=512M
 
   frontend:
     name: JavaScript and CSS lint
