@@ -10,15 +10,15 @@
         "process-timeout": 0
     },
     "scripts": {
-        "dev:doctor": "bash .github/scripts/dev.sh doctor",
-        "dev:start": "bash .github/scripts/dev.sh start",
-        "dev:stop": "bash .github/scripts/dev.sh stop",
-        "dev:seed": "bash .github/scripts/dev.sh seed",
-        "code:check": "bash .github/scripts/check-all.sh",
-        "code:check:full": "bash .github/scripts/check-all.sh --full",
-        "code:fix": "bash .github/scripts/check-all.sh --fix",
+        "dev:doctor": "@php .github/scripts/dev-doctor.php",
+        "dev:start": "@php .github/scripts/run-bash.php .github/scripts/dev.sh start",
+        "dev:stop": "@php .github/scripts/run-bash.php .github/scripts/dev.sh stop",
+        "dev:seed": "@php .github/scripts/run-bash.php .github/scripts/dev.sh seed",
+        "code:check": "@php .github/scripts/run-bash.php .github/scripts/check-all.sh",
+        "code:check:full": "@php .github/scripts/run-bash.php .github/scripts/check-all.sh --full",
+        "code:fix": "@php .github/scripts/run-bash.php .github/scripts/check-all.sh --fix",
         "hooks:install": "git config core.hooksPath .github/hooks",
-        "package": "bash .github/scripts/package.sh"
+        "package": "@php .github/scripts/run-bash.php .github/scripts/package.sh"
     },
     "scripts-descriptions": {
         "dev:doctor": "Check PHP, MySQL, the database and Apache, and print a fix for anything missing",
