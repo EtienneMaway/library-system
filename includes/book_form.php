@@ -92,7 +92,6 @@ function book_form_errors(array $form, array $authors, array $categories, int $c
     $copies = $form['total_copies'];
 
     $errors = [
-        'isbn'        => $form['isbn'] === '' ? null : isbn_error($form['isbn']),
         'title'       => validate_required($form['title'], 'Title', 200),
         'author_id'   => isset($authors[$form['author_id']]) ? null : 'Choose an author from the list.',
         'category_id' => isset($categories[$form['category_id']]) ? null : 'Choose a category from the list.',
@@ -104,6 +103,7 @@ function book_form_errors(array $form, array $authors, array $categories, int $c
             : ((int) $copies < $copies_out
                 ? "$copies_out copies are out on loan, so the total cannot be lower than that."
                 : null),
+        'isbn'        => $form['isbn'] === '' ? null : isbn_error($form['isbn']),
     ];
 
     return array_filter($errors);
@@ -121,11 +121,6 @@ function book_fields(array $form, array $errors, array $authors, array $categori
 {
     ob_start();
     ?>
-    <label for="isbn">ISBN <small>(optional)</small></label>
-    <input id="isbn" name="isbn" value="<?= e($form['isbn']) ?>" maxlength="17" inputmode="numeric" autocomplete="off"
-        placeholder="978-0-385-47454-2"<?= field_attrs($errors, 'isbn') ?>>
-    <?= field_error($errors, 'isbn') ?>
-
     <label for="title">Title</label>
     <input id="title" name="title" value="<?= e($form['title']) ?>" maxlength="200" required<?= field_attrs($errors, 'title') ?>>
     <?= field_error($errors, 'title') ?>
@@ -155,6 +150,11 @@ function book_fields(array $form, array $errors, array $authors, array $categori
     <input id="total_copies" name="total_copies" type="number" min="1" max="999"
         value="<?= e($form['total_copies']) ?>" required<?= field_attrs($errors, 'total_copies') ?>>
     <?= field_error($errors, 'total_copies') ?>
+
+    <label for="isbn">ISBN <small>(optional)</small></label>
+    <input id="isbn" name="isbn" value="<?= e($form['isbn']) ?>" maxlength="17" inputmode="numeric" autocomplete="off"
+        placeholder="978-0-385-47454-2"<?= field_attrs($errors, 'isbn') ?>>
+    <?= field_error($errors, 'isbn') ?>
     <?php
     return (string) ob_get_clean();
 }
