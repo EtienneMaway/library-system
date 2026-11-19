@@ -160,8 +160,35 @@ a { color: inherit; text-decoration-color: var(--lamp); text-decoration-thicknes
 .rail__close { display: none; width: 2.5rem; height: 2.5rem; border-radius: 0.75rem; }
 .rail__close svg { width: 1.375rem; height: 1.375rem; }
 .rail__close:hover { background: rgba(236, 235, 243, 0.1); }
+/* The collapse button: three lines that fold into an X while the drawer is open */
+.rail__toggle {
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  opacity: 0.8;
+  transition: background-color 0.15s, opacity 0.15s;
+}
+.rail__toggle:hover { opacity: 1; background: rgba(236, 235, 243, 0.1); }
+.burger { position: relative; width: 1.25rem; height: 0.875rem; }
+.burger span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: top 0.25s ease, transform 0.25s ease, opacity 0.2s ease, width 0.25s ease;
+}
+.burger span:nth-child(1) { top: 0; }
+.burger span:nth-child(2) { top: 6px; width: 70%; }
+.burger span:nth-child(3) { top: 12px; }
+:root:not([data-rail="closed"]) .burger span:nth-child(1) { top: 6px; transform: rotate(45deg); }
+:root:not([data-rail="closed"]) .burger span:nth-child(2) { opacity: 0; width: 0; }
+:root:not([data-rail="closed"]) .burger span:nth-child(3) { top: 6px; transform: rotate(-45deg); }
+
 .rail__links { display: grid; gap: 0.25rem; margin: 0; padding: 0; list-style: none; }
-.rail__link, .rail__toggle {
+.rail__link {
   position: relative;
   display: flex;
   align-items: center;
@@ -177,8 +204,9 @@ a { color: inherit; text-decoration-color: var(--lamp); text-decoration-thicknes
   opacity: 0.75;
   transition: background-color 0.15s, opacity 0.15s, color 0.15s;
 }
-.rail__link svg, .rail__toggle svg { width: 1.375rem; height: 1.375rem; }
-.rail__link:hover, .rail__toggle:hover { opacity: 1; background: rgba(236, 235, 243, 0.08); }
+.rail__link svg { width: 1.375rem; height: 1.375rem; }
+.rail__link:hover { opacity: 1; background: rgba(236, 235, 243, 0.08); }
+.rail__icon { position: relative; display: inline-flex; }
 .rail__link[aria-current] { opacity: 1; color: var(--lamp); background: var(--lamp-wash); }
 .rail__link[aria-current]::before {
   content: "";
@@ -190,14 +218,59 @@ a { color: inherit; text-decoration-color: var(--lamp); text-decoration-thicknes
   border-radius: 0 3px 3px 0;
   background: var(--lamp);
 }
-.rail__toggle { margin-top: auto; }
-.rail__toggle svg { transition: transform 0.25s ease; }
+
+/* Team: an amber dot that pulses and a "New" badge, until the page has been opened once */
+.rail__ping {
+  position: absolute;
+  top: -0.1875rem;
+  right: -0.25rem;
+  width: 0.5625rem;
+  height: 0.5625rem;
+  border-radius: 50%;
+  background: var(--lamp);
+  box-shadow: 0 0 0 2px var(--nav);
+}
+.rail__ping::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--lamp);
+  animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes ping {
+  75%, 100% { transform: scale(2.75); opacity: 0; }
+}
+.rail__badge {
+  margin-left: auto;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 999px;
+  background: var(--lamp);
+  color: var(--lamp-ink);
+  font: 700 0.625rem/1.5 var(--typed);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.rail__link--new:not([aria-current]) { opacity: 1; }
+.rail__link--new:not([aria-current]) .rail__label {
+  background: linear-gradient(90deg, var(--nav-ink) 0%, var(--lamp) 50%, var(--nav-ink) 100%) 0 0 / 200% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+[data-team-seen] .rail__ping, [data-team-seen] .rail__badge, .rail__link[aria-current] .rail__ping, .rail__link[aria-current] .rail__badge { display: none; }
+[data-team-seen] .rail__link--new:not([aria-current]) { opacity: 0.75; }
+[data-team-seen] .rail__link--new .rail__label { background: none; color: inherit; animation: none; }
 
 /* Closed to icons: the names shrink to small captions under each icon */
 [data-rail="closed"] .rail { padding-inline: 0.5rem; }
-[data-rail="closed"] .rail__top { justify-content: center; }
-[data-rail="closed"] .rail__name { display: none; }
-[data-rail="closed"] .rail__link, [data-rail="closed"] .rail__toggle {
+[data-rail="closed"] .rail__top { flex-direction: column; justify-content: center; }
+[data-rail="closed"] .rail__brand { display: none; }
+[data-rail="closed"] .rail__badge { display: none; }
+[data-rail="closed"] .rail__link {
   flex-direction: column;
   justify-content: center;
   gap: 0.25rem;
@@ -205,7 +278,6 @@ a { color: inherit; text-decoration-color: var(--lamp); text-decoration-thicknes
   font-size: 0.6875rem;
 }
 [data-rail="closed"] .rail__link[aria-current]::before { left: -0.5rem; }
-[data-rail="closed"] .rail__toggle svg { transform: rotate(180deg); }
 
 .drawer-backdrop { display: none; }
 .topbar__menu { display: none; }
@@ -526,6 +598,69 @@ td.num, td.nowrap { white-space: nowrap; }
   .panels { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: start; }
 }
 
+/* Team page: the same banner without the overlapping numbers, then one card per member */
+.hero--short { padding-bottom: clamp(1.75rem, 4vw, 2.75rem); margin-bottom: 1.75rem; }
+.team {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.member-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  gap: 0.875rem 1rem;
+  padding: 1.25rem;
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .member-card { animation: rise 0.45s ease both; animation-delay: calc(var(--i, 0) * 60ms); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(0.75rem); }
+}
+.member-card__avatar {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--lamp-wash);
+  border: 2px solid var(--lamp);
+  font: 700 1rem var(--typed);
+  letter-spacing: 0.04em;
+}
+.member-card__body { min-width: 0; }
+.member-card__name { margin: 0; font-size: 1.125rem; line-height: 1.25; overflow-wrap: anywhere; }
+.member-card__work { margin: 0.25rem 0 0; font-size: 0.875rem; color: var(--ink-soft); }
+.member-card__badge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: 700 0.6875rem var(--typed);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.member-card__facts {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0;
+  border-top: 1px dashed var(--line);
+  padding-top: 0.75rem;
+}
+.member-card__facts dt { font: 700 0.6875rem var(--typed); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+.member-card__facts dd { margin: 0.125rem 0 0; font: 700 1rem var(--typed); font-variant-numeric: tabular-nums; }
+
 /* Bar chart: loans per category. The fill is all loans; the red part inside it is still out. */
 .bars { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
 .bars__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.375rem 0.75rem; align-items: center; }
@@ -824,8 +959,9 @@ td.num, td.nowrap { white-space: nowrap; }
   .rail__close { display: inline-flex; }
   .rail__toggle { display: none; }
   [data-rail="closed"] .rail { padding-inline: 0.875rem; }
-  [data-rail="closed"] .rail__top { justify-content: space-between; }
-  [data-rail="closed"] .rail__name { display: inline; }
+  [data-rail="closed"] .rail__top { flex-direction: row; justify-content: space-between; }
+  [data-rail="closed"] .rail__badge { display: inline; }
+  [data-rail="closed"] .rail__brand { display: flex; }
   [data-rail="closed"] .rail__link { flex-direction: row; gap: 0.875rem; padding: 0.6875rem 0.875rem; font-size: 0.9375rem; }
   [data-rail="closed"] .rail__link[aria-current]::before { left: -0.875rem; }
   .rail__link[aria-current]::before { left: -0.875rem; }

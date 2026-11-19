@@ -39,7 +39,7 @@ document.addEventListener('submit', function (event) {
     paint();
 })();
 
-// Navigation drawer. Wide screens: the toggle at its foot opens it (icons and names) or closes it
+// Navigation drawer. Wide screens: the toggle at its top opens it (icons and names) or closes it
 // to icons only, remembered in this browser. Phones: it slides in from the left with the menu button
 // and slides out with the close button, a tap outside it, a link, or Esc.
 (function () {
@@ -52,9 +52,10 @@ document.addEventListener('submit', function (event) {
 
     function paintToggle() {
         var open = root.getAttribute('data-rail') !== 'closed';
+        var label = open ? 'Collapse the menu' : 'Expand the menu';
         toggle.setAttribute('aria-expanded', String(open));
-        toggle.setAttribute('aria-label', open ? 'Collapse the menu' : 'Expand the menu');
-        toggle.querySelector('.rail__label').textContent = open ? 'Collapse' : 'Expand';
+        toggle.setAttribute('aria-label', label);
+        toggle.setAttribute('title', label);
     }
 
     function slide(open) {
@@ -91,6 +92,13 @@ document.addEventListener('submit', function (event) {
 
     paintToggle();
     slide(false);
+})();
+
+// The Team link glows with a "New" badge until it has been opened once in this browser.
+(function () {
+    if (!document.querySelector('.rail__link--new[aria-current]')) return;
+    document.documentElement.setAttribute('data-team-seen', '');
+    try { localStorage.setItem('team-seen', '1'); } catch { /* storage blocked: it glows again next visit */ }
 })();
 
 // Toasts: success and info close after 5 seconds, errors after 8. Hover or focus pauses them. Esc closes all.

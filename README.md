@@ -294,7 +294,7 @@ library-system/
 ├── database/            library_db.sql, queries.sql, erd.png
 ├── includes/            header, navbar, footer, auth_check, functions, shared forms
 ├── auth/                login and logout
-├── dashboard/           summary after login
+├── dashboard/           summary after login, and the team page
 ├── books/               list, create, edit, delete
 ├── members/             list, create, edit, delete
 ├── loans/               list, issue, return

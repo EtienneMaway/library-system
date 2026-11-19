@@ -36,6 +36,17 @@ function e(mixed $value): string
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
+/** The first letters of the first two words of a name: "Mugalu Kevin" gives "MK". */
+function initials(string $name): string
+{
+    $letters = '';
+    foreach (array_slice(preg_split('/\s+/', trim($name)) ?: [], 0, 2) as $part) {
+        $letters .= mb_strtoupper(mb_substr($part, 0, 1));
+    }
+
+    return $letters;
+}
+
 /**
  * Build a link from the project root, wherever the folder is installed.
  * url('books/create.php') gives /library-system/books/create.php.
