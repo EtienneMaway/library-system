@@ -22,7 +22,7 @@ NULLs in a unique key, so returned loans stay in the history and the book can be
 |---|---|---|
 | `authors` | PK `author_id`, UNIQUE (`name`, `country`) | Name and country describe the author only. |
 | `categories` | PK `category_id`, UNIQUE `name` | Stored once, books point to it. |
-| `books` | PK `book_id`, UNIQUE `isbn`, FK `author_id`, `category_id` | Only facts about the book. Author and category details stay in their tables. |
+| `books` | PK `book_id`, UNIQUE `isbn` (optional, NULL when a book has none), FK `author_id`, `category_id` | Only facts about the book. Author and category details stay in their tables. |
 | `members` | PK `member_id`, UNIQUE `member_number`, `email` | Contact details and status describe the member only. |
 | `loans` | PK `loan_id`, FK `member_id`, `book_id` | The dates describe one loan. Member and book details are not copied. |
 | `users` | PK `user_id`, UNIQUE `username`, `email` | Login details only. A user has at most one emailed code waiting, so its `code_*` columns sit here. Only a hash of the code is kept. |

@@ -33,7 +33,7 @@ CREATE TABLE categories (
 
 CREATE TABLE books (
   book_id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  isbn             VARCHAR(17)  NOT NULL,
+  isbn             VARCHAR(17)  NULL,  -- optional: some books have none. UNIQUE still allows many NULLs.
   title            VARCHAR(200) NOT NULL,
   author_id        INT UNSIGNED NOT NULL,
   category_id      INT UNSIGNED NOT NULL,

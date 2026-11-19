@@ -45,6 +45,7 @@ Reset the data first with `composer dev:seed`. In the sample data:
 | [ ] | A book on loan cannot be deleted | Delete *Things Fall Apart* | "2 copies are still out on loan" | auto |
 | [ ] | A book with loan history cannot be deleted | Delete a book whose loans were all returned | "it appears in past loans" | |
 | [ ] | ISBNs are unique | Add a book with an ISBN already in the list | "Another book already has that ISBN." | auto |
+| [ ] | ISBN is optional | Add a book with the ISBN left empty | It is saved and the list shows "None" | auto |
 | [ ] | ISBNs are valid | Change the last digit of a real ISBN | "its last digit does not match" | auto |
 | [ ] | Copies cannot drop below those on loan | Edit *Things Fall Apart* to 1 copy | "2 copies are out on loan, so the total cannot be lower" | auto |
 | [ ] | A member holding a book cannot be deleted | Delete Grace Atim | "they still hold 1 book" | auto |

@@ -35,5 +35,5 @@ $page_title = 'Delete a book';
 require __DIR__ . '/../includes/header.php';
 ?>
 <h1>Delete a book</h1>
-<?= delete_confirmation($view, 'book', $view['row']['title'], 'ISBN ' . $view['row']['isbn']) ?>
+<?= delete_confirmation($view, 'book', $view['row']['title'], $view['row']['isbn'] === null ? 'no ISBN' : 'ISBN ' . $view['row']['isbn']) ?>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

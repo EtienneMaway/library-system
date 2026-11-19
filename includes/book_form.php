@@ -65,14 +65,14 @@ function book_form_input(): array
 }
 
 /**
- * The values both INSERT and UPDATE write, in this order: isbn, title, author_id, category_id, publisher, year_published.
+ * The values both INSERT and UPDATE write (a blank ISBN is saved as NULL), in this order: isbn, title, author_id, category_id, publisher, year_published.
  *
  * @param array<string, string> $form
  */
 function book_values(array $form): array
 {
     return [
-        $form['isbn'], $form['title'], (int) $form['author_id'], (int) $form['category_id'],
+        $form['isbn'] === '' ? null : $form['isbn'], $form['title'], (int) $form['author_id'], (int) $form['category_id'],
         $form['publisher'], (int) $form['year_published'],
     ];
 }
@@ -92,7 +92,7 @@ function book_form_errors(array $form, array $authors, array $categories, int $c
     $copies = $form['total_copies'];
 
     $errors = [
-        'isbn'        => validate_required($form['isbn'], 'ISBN', 17) ?? isbn_error($form['isbn']),
+        'isbn'        => $form['isbn'] === '' ? null : isbn_error($form['isbn']),
         'title'       => validate_required($form['title'], 'Title', 200),
         'author_id'   => isset($authors[$form['author_id']]) ? null : 'Choose an author from the list.',
         'category_id' => isset($categories[$form['category_id']]) ? null : 'Choose a category from the list.',
@@ -121,9 +121,9 @@ function book_fields(array $form, array $errors, array $authors, array $categori
 {
     ob_start();
     ?>
-    <label for="isbn">ISBN</label>
+    <label for="isbn">ISBN <small>(optional)</small></label>
     <input id="isbn" name="isbn" value="<?= e($form['isbn']) ?>" maxlength="17" inputmode="numeric" autocomplete="off"
-        placeholder="978-0-385-47454-2" required<?= field_attrs($errors, 'isbn') ?>>
+        placeholder="978-0-385-47454-2"<?= field_attrs($errors, 'isbn') ?>>
     <?= field_error($errors, 'isbn') ?>
 
     <label for="title">Title</label>

@@ -99,6 +99,12 @@ expect "Two books cannot share an ISBN" "Another book already has that ISBN." \
   "$(post books/create.php -d "isbn=$isbn&title=Copy&author_id=$author&category_id=$category&publisher=P&year_published=2000&total_copies=1")"
 expect "A mistyped ISBN is refused" "its last digit does not match" \
   "$(post books/create.php -d "isbn=9780385474543&title=Copy&author_id=$author&category_id=$category&publisher=P&year_published=2000&total_copies=1")"
+expect "A book can be added without an ISBN" "added to the catalogue" \
+  "$(post books/create.php -d "isbn=&title=NoIsbnA&author_id=$author&category_id=$category&publisher=P&year_published=2000&total_copies=1")"
+expect "A second book without an ISBN is also fine" "added to the catalogue" \
+  "$(post books/create.php -d "isbn=&title=NoIsbnB&author_id=$author&category_id=$category&publisher=P&year_published=2000&total_copies=1")"
+same "Both books were saved with no ISBN" 2 "$(sql "SELECT COUNT(*) FROM books WHERE title LIKE 'NoIsbn%' AND isbn IS NULL")"
+sql "DELETE FROM books WHERE title LIKE 'NoIsbn%'" >/dev/null
 busy_book=$(sql "SELECT book_id FROM loans WHERE date_returned IS NULL GROUP BY book_id HAVING COUNT(*) > 1 LIMIT 1")
 expect "Total copies cannot drop below the copies on loan" "out on loan, so the total cannot be lower" \
   "$(post books/edit.php -d "id=$busy_book&isbn=$(sql "SELECT isbn FROM books WHERE book_id = $busy_book")&title=T&author_id=$author&category_id=$category&publisher=P&year_published=2000&total_copies=1")"

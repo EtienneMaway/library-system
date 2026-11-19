@@ -86,7 +86,7 @@ require __DIR__ . '/../includes/header.php';
                 </td>
                 <td><?= e($book['author_name']) ?></td>
                 <td><?= e($book['category_name']) ?></td>
-                <td><?= e($book['isbn']) ?></td>
+                <td><?= $book['isbn'] === null ? '<small>None</small>' : e($book['isbn']) ?></td>
                 <td class="num">
                     <?= e($book['available_copies']) ?> of <?= e($book['total_copies']) ?>
                     <?php if ($out > 0) : ?>
