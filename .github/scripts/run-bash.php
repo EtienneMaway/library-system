@@ -2,54 +2,13 @@
 
 declare(strict_types=1);
 
-function findExecutable(string $name): ?string
-{
-    $extensions = PHP_OS_FAMILY === 'Windows'
-        ? (getenv('PATHEXT') ? explode(';', getenv('PATHEXT')) : ['.EXE', '.BAT', '.CMD'])
-        : [''];
+// Run a project Bash script from any shell. Composer calls this with @php, so
+// "composer dev:start" works the same in PowerShell, Command Prompt, Git Bash
+// and the Mac Terminal. On Windows it uses Git for Windows' Bash, never WSL.
+//
+//   php .github/scripts/run-bash.php .github/scripts/dev.sh start
 
-    foreach (explode(PATH_SEPARATOR, (string) getenv('PATH')) as $directory) {
-        foreach ($extensions as $extension) {
-            $candidate = rtrim($directory, '\\/') . DIRECTORY_SEPARATOR . $name . $extension;
-            if (is_file($candidate) && (PHP_OS_FAMILY === 'Windows' || is_executable($candidate))) {
-                return $candidate;
-            }
-        }
-    }
-
-    return null;
-}
-
-function findBash(): ?string
-{
-    $bash = findExecutable('bash');
-    if ($bash !== null || PHP_OS_FAMILY !== 'Windows') {
-        return $bash;
-    }
-
-    $git = findExecutable('git');
-    if ($git === null) {
-        return null;
-    }
-
-    $directory = dirname($git);
-    for ($depth = 0; $depth < 5; ++$depth) {
-        foreach (['bin\\bash.exe', 'usr\\bin\\bash.exe'] as $relativePath) {
-            $candidate = $directory . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
-            if (is_file($candidate)) {
-                return $candidate;
-            }
-        }
-
-        $parent = dirname($directory);
-        if ($parent === $directory) {
-            break;
-        }
-        $directory = $parent;
-    }
-
-    return null;
-}
+require __DIR__ . '/lib/executables.php';
 
 $arguments = array_slice($argv, 1);
 if ($arguments === []) {
@@ -59,20 +18,21 @@ if ($arguments === []) {
 
 $bash = findBash();
 if ($bash === null) {
-    fwrite(STDERR, "Bash was not found. Install Git for Windows or add Bash to PATH.\n");
+    fwrite(STDERR, isWindows()
+        ? "Git Bash was not found. Install Git for Windows from git-scm.com, then open a new terminal.\n"
+        : "Bash was not found. Install it, or run the script with your shell directly.\n");
     exit(1);
 }
 
-$root = dirname(__DIR__, 2);
 $process = proc_open(
     array_merge([$bash], $arguments),
     [0 => STDIN, 1 => STDOUT, 2 => STDERR],
     $pipes,
-    $root
+    dirname(__DIR__, 2)
 );
 
 if (!is_resource($process)) {
-    fwrite(STDERR, "Could not start Bash.\n");
+    fwrite(STDERR, "Could not start Bash ({$bash}).\n");
     exit(1);
 }
 

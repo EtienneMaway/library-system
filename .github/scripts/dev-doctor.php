@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+// Check what is installed and running, and print a fix for anything missing.
+// This is the only copy of the doctor: "composer dev:doctor" runs it directly,
+// and "bash .github/scripts/dev.sh doctor" hands over to it.
+
+require __DIR__ . '/lib/executables.php';
+
 $root = dirname(__DIR__, 2);
 $isWindows = PHP_OS_FAMILY === 'Windows';
 $problems = 0;
@@ -21,24 +27,6 @@ function miss(string $message, string $fix): void
 function note(string $message): void
 {
     echo "NOTE {$message}\n";
-}
-
-function findExecutable(string $name): ?string
-{
-    $extensions = PHP_OS_FAMILY === 'Windows'
-        ? (getenv('PATHEXT') ? explode(';', getenv('PATHEXT')) : ['.EXE', '.BAT', '.CMD'])
-        : [''];
-
-    foreach (explode(PATH_SEPARATOR, (string) getenv('PATH')) as $directory) {
-        foreach ($extensions as $extension) {
-            $candidate = rtrim($directory, '\\/') . DIRECTORY_SEPARATOR . $name . $extension;
-            if (is_file($candidate)) {
-                return $candidate;
-            }
-        }
-    }
-
-    return null;
 }
 
 function runCommand(array $command): array
@@ -82,6 +70,12 @@ function findAppUrl(): ?string
 
 function mysqlCommand(bool $isWindows): ?array
 {
+    // Same override as dev.sh, for example MYSQL="mysql -uroot -psecret".
+    $override = trim((string) getenv('MYSQL'));
+    if ($override !== '') {
+        return preg_split('/\s+/', $override) ?: null;
+    }
+
     if ($isWindows) {
         $xamppMysql = rtrim((string) (getenv('SystemDrive') ?: 'C:'), '\\/') . '\\xampp\\mysql\\bin\\mysql.exe';
         if (is_file($xamppMysql)) {
@@ -154,7 +148,9 @@ if ($url !== null) {
             miss("Project is not in the web folder (it is in {$root})", 'clone it into C:\\xampp\\htdocs\\library-system');
         }
     }
-    miss('Apache is not serving the app', 'composer dev:start');
+    miss('Apache is not serving the app', $isWindows
+        ? 'composer dev:start'
+        : 'composer dev:start (on a Mac, see the README for the one-time Apache setup)');
 }
 
 $node = findExecutable('node');
