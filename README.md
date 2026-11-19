@@ -8,7 +8,7 @@ A web system that lets librarians manage books, members and loans from a browser
 
 ## Quick start
 
-After setting up once (Windows or Mac steps below), these are the only commands you need. Run them from the project folder, in Git Bash on Windows or Terminal on a Mac.
+After setting up once (Windows or Mac steps below), these are the only commands you need. Run them from the project folder in PowerShell, Command Prompt, or Terminal. On Windows, Git for Windows supplies Bash for the project scripts; you do not need to launch Git Bash or add Bash to `PATH`.
 
 ```sh
 composer dev:doctor     # what's installed, running or missing, with a fix for each
@@ -65,13 +65,13 @@ Without Git, download the ZIP from GitHub and extract it so the folder is `C:\xa
 1. Click **New**, enter `library_db`, choose the collation `utf8mb4_general_ci`, and click **Create**.
 2. Select `library_db`, open the **Import** tab, choose `database/library_db.sql` from the project, and click **Import**.
 
-With Composer installed (see [Project commands](#project-commands-composer)), `composer dev:seed` in Git Bash does both steps for you.
+With Composer installed (see [Project commands](#project-commands-composer)), `composer dev:seed` does both steps for you.
 
 **5. Check the connection settings.** `config/database.php` uses XAMPP's defaults: user `root` and an empty password. Change nothing unless you set a MySQL password yourself.
 
 **6. Open the app** at <http://localhost/library-system>.
 
-**7. Check everything.** Run `composer dev:doctor` in Git Bash. Each line should say OK. Any MISS line comes with the fix to run.
+**7. Check everything.** Run `composer dev:doctor` in PowerShell, Command Prompt, or Git Bash. Each line should say OK. Any MISS line comes with the fix to run.
 
 ## Set up on a Mac (Homebrew)
 
@@ -211,7 +211,7 @@ Install it once:
 - **Mac:** `brew install composer`
 - **Windows:** download Composer-Setup.exe from getcomposer.org and pick `C:\xampp\php\php.exe` when it asks for PHP.
 
-Then run these from the project folder. On Windows, use Git Bash.
+Then run these from the project folder in PowerShell, Command Prompt, or Git Bash on Windows. The Composer scripts locate Bash from Git for Windows automatically.
 
 | Command | What it does |
 | --- | --- |
@@ -225,7 +225,7 @@ Then run these from the project folder. On Windows, use Git Bash.
 | `composer hooks:install` | Runs the checks before every `git push` (once per clone) |
 | `composer package -- "Group Sixteen"` | Builds `LMS_Group_Sixteen.zip` for submission, next to the project folder. It holds exactly the brief's layout, without the developer files (`composer.json`, `.github/`, `.env`). Export `docs/report.docx` to `docs/report.pdf` first. |
 
-`composer list` shows them all. Without Composer, run the scripts directly, for example `bash .github/scripts/dev.sh doctor` or `bash .github/scripts/check-all.sh --fix`. If something doesn't work, start with `composer dev:doctor`. The manual steps are below.
+`composer list` shows them all. Without Composer, run the scripts directly from Git Bash on Windows, for example `bash .github/scripts/dev.sh doctor` or `bash .github/scripts/check-all.sh --fix`. If something doesn't work, start with `composer dev:doctor`. The manual steps are below.
 
 | Task | Windows | Mac |
 | --- | --- | --- |
@@ -361,7 +361,7 @@ Open the failed check on the pull request page to see which file and line to fix
 
 ### Run the checks on your computer
 
-Run them before every push, from the project folder, in Git Bash on Windows or Terminal on a Mac:
+Run them before every push, from the project folder in PowerShell, Command Prompt, or Git Bash on Windows, or Terminal on a Mac:
 
 ```sh
 composer code:check         # code checks, takes about a minute

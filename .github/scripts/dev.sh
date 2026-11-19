@@ -40,51 +40,14 @@ find_url() {
 }
 db_up() { [ -n "$MYSQL" ] && $MYSQL -e 'SELECT 1' >/dev/null 2>&1; }
 
+# The checks live in dev-doctor.php, so there is only one copy to keep up to date.
 doctor() {
-  printf '%sChecking your setup (%s)%s\n' "$B" "$OS" "$N"
-
   if [ -z "$PHP" ]; then
     if [ "$OS" = windows ]; then miss "PHP not found" "install XAMPP into C:\\xampp from apachefriends.org"
     else miss "PHP not found" "brew install php"; fi
-  else
-    v=$("$PHP" -r 'echo PHP_VERSION;')
-    if "$PHP" -r 'exit(version_compare(PHP_VERSION, "8.0", ">=") ? 0 : 1);'; then ok "PHP $v"
-    else miss "PHP $v is too old" "install PHP 8.0 or newer (a current XAMPP)"; fi
-    if "$PHP" -m | grep -qi '^pdo_mysql$'; then ok "PHP can talk to MySQL (pdo_mysql)"
-    else miss "pdo_mysql extension is off" "in php.ini remove the ; before extension=pdo_mysql, then restart Apache"; fi
+    return 1
   fi
-
-  if [ -z "$MYSQL" ]; then
-    if [ "$OS" = windows ]; then miss "MySQL client not found" "XAMPP includes it at C:\\xampp\\mysql\\bin; reinstall XAMPP with MySQL ticked"
-    else miss "MySQL client not found" "brew install mariadb@10.11"; fi
-  elif db_up; then
-    ok "MySQL server is running"
-    tables=$($MYSQL -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='library_db'" 2>/dev/null)
-    if [ "${tables:-0}" -ge 6 ]; then
-      books=$($MYSQL -N -e "SELECT COUNT(*) FROM library_db.books" 2>/dev/null)
-      ok "Database library_db has $tables tables and ${books:-0} books"
-    else miss "Database library_db is missing or incomplete" "bash .github/scripts/dev.sh seed"; fi
-  else
-    miss "MySQL server is not running" "bash .github/scripts/dev.sh start"
-  fi
-
-  if url=$(find_url); then ok "App answers at $url"
-  else
-    if [ "$OS" = windows ]; then
-      case "$ROOT" in /c/xampp/htdocs/library-system) ;;
-        *) miss "Project is not in the web folder (it is in $ROOT)" "clone it into C:\\xampp\\htdocs\\library-system" ;; esac
-    fi
-    miss "Apache is not serving the app" "bash .github/scripts/dev.sh start (on a Mac, see the README for the one-time Apache setup)"
-  fi
-
-  if command -v node >/dev/null; then ok "Node.js $(node -v) (for the JavaScript and CSS checks)"
-  else note "Node.js not found. Optional: only needed to run the JS and CSS checks locally."; fi
-  command -v git >/dev/null && ok "Git $(git --version | awk '{print $3}')" || miss "Git not found" "install it from git-scm.com"
-
-  echo
-  if [ "$problems" -eq 0 ]; then printf '%sEverything is ready.%s\n' "$G" "$N"; return 0; fi
-  printf '%s%s problem(s) to fix.%s Run the fix lines above, then run doctor again.\n' "$R" "$problems" "$N"
-  return 1
+  MYSQL="$MYSQL" "$PHP" .github/scripts/dev-doctor.php
 }
 
 start() {
