@@ -26,8 +26,8 @@ require __DIR__ . '/../includes/header.php';
 </section>
 
 <ul class="team">
-    <?php foreach (TEAM as [$name, $id, $work, $badge]) : ?>
-        <li class="member-card">
+    <?php foreach (TEAM as $i => [$name, $id, $work, $badge]) : ?>
+        <li class="member-card" style="--i: <?= (int) $i ?>">
             <span class="member-card__avatar" aria-hidden="true"><?= e(initials($name)) ?></span>
             <div class="member-card__body">
                 <h2 class="member-card__name"><?= e($name) ?></h2>

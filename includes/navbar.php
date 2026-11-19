@@ -28,6 +28,10 @@ foreach (array_keys($links) as $path) {
             <span class="rail__logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5.5C4.5 4 8 4 12 6c4-2 7.5-2 10-.5V19c-2.5-1.5-6-1.5-10 .5-4-2-7.5-2-10-.5z"/><path d="M12 6v13.5"/></svg></span>
             <span class="rail__name">Library</span>
         </a>
+        <!-- Wide screens: open the drawer to icons and names, or close it to icons only. The lines turn into an X when it is open. -->
+        <button type="button" class="rail__toggle" data-rail-toggle aria-controls="drawer" aria-expanded="true" aria-label="Collapse the menu" title="Collapse the menu">
+            <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
         <button type="button" class="rail__close" data-drawer-close aria-label="Close menu">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
         </button>
@@ -35,19 +39,20 @@ foreach (array_keys($links) as $path) {
     <ul class="rail__links">
         <?php foreach ($links as $path => [$label, $icon]) :
             $section = dirname($path);
-            $current = $exact !== null ? $exact === $path : str_contains($here, "/$section/"); ?>
+            $current = $exact !== null ? $exact === $path : str_contains($here, "/$section/");
+            $is_new = $path === 'dashboard/team.php'; // glows until it has been opened once (app.js) ?>
             <li>
-                <a class="rail__link" href="<?= e(url($path)) ?>" title="<?= e($label) ?>"<?= $current ? ' aria-current="page"' : '' ?>>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><?= $icon ?></svg>
+                <a class="rail__link<?= $is_new ? ' rail__link--new' : '' ?>" href="<?= e(url($path)) ?>" title="<?= e($label) ?>"<?= $current ? ' aria-current="page"' : '' ?>>
+                    <span class="rail__icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><?= $icon ?></svg>
+                        <?= $is_new ? '<span class="rail__ping" aria-hidden="true"></span>' : '' ?>
+                    </span>
                     <span class="rail__label"><?= e($label) ?></span>
+                    <?= $is_new ? '<span class="rail__badge">New</span>' : '' ?>
                 </a>
             </li>
         <?php endforeach; ?>
     </ul>
-    <button type="button" class="rail__toggle" data-rail-toggle aria-controls="drawer" aria-expanded="true">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-        <span class="rail__label">Collapse</span>
-    </button>
 </nav>
 <div class="drawer-backdrop" data-drawer-close></div>
 <header class="topbar">

@@ -22,6 +22,10 @@ $page_title = $page_title ?? 'Library';
             if (localStorage.getItem('rail') === 'closed') {
                 document.documentElement.setAttribute('data-rail', 'closed');
             }
+            // The Team link stops glowing once it has been opened (see app.js).
+            if (localStorage.getItem('team-seen')) {
+                document.documentElement.setAttribute('data-team-seen', '');
+            }
         } catch (e) {}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
